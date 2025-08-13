@@ -778,34 +778,36 @@ export default function Hero() {
         <section ref={containerRef} className="hero-section">
 
             {/* HEADLINE */}
-            <h1 className="hero-title">
-                Health insurance that <span ref={textRef1} className="anim-text">doesn&apos;t</span>{" "}
-                <br className="hero-line-break" />
+            <div className="headline-wrapper">
+                <h1 className="hero-title">
+                    Health insurance that <span ref={textRef1} className="anim-text">doesn&apos;t</span>{" "}
+                    <br className="hero-line-break" />
 
-                <span className="whitespace-nowrap">
-                    <span ref={textRef2} className="anim-text">get</span>
+                    <span className="whitespace-nowrap">
+                        <span ref={textRef2} className="anim-text">get</span>
 
-                    {/* COLLAPSIBLE MARQUEE */}
-                    <div ref={marqueeWrapperRef} className="marquee-wrapper">
-                        <div ref={marqueeTrackRef} className="marquee-track">
-                            {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, i) => (
-                                <div key={i} className="marquee-item">
-                                    <span>{item.icon}</span>
-                                    <span>{item.text}</span>
-                                    <span className="opacity-30">|</span>
-                                </div>
-                            ))}
+                        {/* COLLAPSIBLE MARQUEE */}
+                        <div ref={marqueeWrapperRef} className="marquee-wrapper">
+                            <div ref={marqueeTrackRef} className="marquee-track">
+                                {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, i) => (
+                                    <div key={i} className="marquee-item">
+                                        <span>{item.icon}</span>
+                                        <span>{item.text}</span>
+                                        <span className="opacity-30">|</span>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                    </div>
 
-                    <span
-                        ref={textRef3}
-                        className="anim-text hero-text-tail"
-                    >
-                        in the way.
+                        <span
+                            ref={textRef3}
+                            className="anim-text hero-text-tail"
+                        >
+                            in the way.
+                        </span>
                     </span>
-                </span>
-            </h1>
+                </h1>
+            </div>
 
             {/* SPLIT LAYOUT: CONTENT & SLIDER */}
             <div className="hero-content-wrapper">

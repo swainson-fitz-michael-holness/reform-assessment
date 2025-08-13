@@ -200,6 +200,13 @@
     text-align: center;
   }
 
+  .headline-wrapper {
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
   /* Remove the forced line break on mobile */
   .hero-line-break {
     display: none;
