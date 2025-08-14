@@ -53,11 +53,13 @@ const DESIGN_TOKENS = {
     tablet_maxScaleDist: 300,
     tablet_descriptionFontSize: 24,
 
-    // Mobile base (500px)
+    // Mobile base (500px) - Horizontal slider (proportional scaling)
     mobile_marqueeWidth: 280,
     mobile_marqueeHeight: 50,
     mobile_cardWidth: 280,
     mobile_cardHeight: 156,
+    mobile_cardGap: 8,
+    mobile_maxScaleDist: 200,
 } as const;
 
 type LayoutMode = 'desktop' | 'tablet' | 'mobile';
@@ -134,18 +136,20 @@ function getResponsiveDimensions(viewportWidth: number) {
         };
     }
 
-    // Mobile fallback
+    // Mobile: Proportional scaling based on 500px reference (like desktop)
+    const baseWidth = DESIGN_TOKENS.mobile;
+
     return {
         mode: 'mobile' as const,
-        marqueeWidth: DESIGN_TOKENS.mobile_marqueeWidth,
-        marqueeExpandedWidth: DESIGN_TOKENS.mobile_marqueeWidth + 10,
-        marqueeHeight: DESIGN_TOKENS.mobile_marqueeHeight,
-        cardWidth: DESIGN_TOKENS.mobile_cardWidth,
-        cardHeight: DESIGN_TOKENS.mobile_cardHeight,
-        cardGap: 8,
-        maxScaleDist: 200,
-        get step() { return this.cardHeight + this.cardGap; },
-        get totalHeight() { return CARDS.length * this.step; },
+        marqueeWidth: scaleValue(DESIGN_TOKENS.mobile_marqueeWidth, baseWidth, viewportWidth),
+        marqueeExpandedWidth: scaleValue(DESIGN_TOKENS.mobile_marqueeWidth + 10, baseWidth, viewportWidth),
+        marqueeHeight: scaleValue(DESIGN_TOKENS.mobile_marqueeHeight, baseWidth, viewportWidth),
+        cardWidth: scaleValue(DESIGN_TOKENS.mobile_cardWidth, baseWidth, viewportWidth),
+        cardHeight: scaleValue(DESIGN_TOKENS.mobile_cardHeight, baseWidth, viewportWidth),
+        cardGap: scaleValue(DESIGN_TOKENS.mobile_cardGap, baseWidth, viewportWidth),
+        maxScaleDist: scaleValue(DESIGN_TOKENS.mobile_maxScaleDist, baseWidth, viewportWidth),
+        get step() { return this.cardWidth + this.cardGap; },
+        get totalWidth() { return CARDS.length * this.step; },
     };
 }
 
@@ -191,7 +195,7 @@ export default function Hero() {
     }, []);
 
     // ===========================================
-    // HORIZONTAL SLIDER (Desktop: > 1024px)
+    // HORIZONTAL SLIDER (Desktop: > 1024px & Mobile: <= 500px)
     // ===========================================
     const initHorizontalSlider = useCallback((
         sliderContainer: HTMLDivElement,

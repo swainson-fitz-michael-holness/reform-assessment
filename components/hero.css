@@ -176,7 +176,11 @@
   backface-visibility: hidden;
 }
 
-/* MOBILE: < 501px */
+/* ================================================== */
+/* MOBILE: < 501px                                    */
+/* Proportional scaling based on 500px reference      */
+/* Formula: value / 500 * 100vw                       */
+/* ================================================== */
 @media (max-width: 500px) {
   .hero-content-wrapper {
     display: flex;
@@ -187,6 +191,8 @@
   /* Put the slider visually above the text */
   .hero-slider-side {
     order: -1;
+    /* Proportional padding: 16px at 500px */
+    padding: calc(16 / 500 * 100vw) 0;
   }
 
   /* Ensure both take full width */
@@ -227,6 +233,21 @@
   /* "in the way." on its own line under the marquee */
   .hero-title .hero-text-tail {
     display: block;
+  }
+
+  /* Slider cards - proportional scaling like desktop */
+  .slider-card {
+    /* 280px width at 500px = 56vw */
+    width: calc(280 / 500 * 100vw);
+    /* 156px height at 500px = 31.2vw */
+    height: calc(156 / 500 * 100vw);
+    /* 12px border-radius at 500px */
+    border-radius: calc(12 / 500 * 100vw);
+  }
+
+  .slider-track-relative {
+    /* Height to accommodate scaled cards: 180px at 500px */
+    height: calc(180 / 500 * 100vw);
   }
 }
 
