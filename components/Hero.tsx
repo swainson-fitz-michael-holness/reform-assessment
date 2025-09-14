@@ -231,7 +231,7 @@ export default function Hero() {
             const xPos = initialOffset + relativePos * step;
 
             // Clear any previous GSAP transforms first
-            gsap.set(card, { clearProps: "x,y,xPercent,yPercent,top,left,scale,transform" });
+            gsap.set(card, { clearProps: "x,y,xPercent,yPercent,top,left,scale,transform,opacity,visibility" });
 
             // Set position with explicit vertical centering
             // Using transform for both x position and vertical centering
@@ -240,6 +240,7 @@ export default function Hero() {
                 top: '50%',
                 yPercent: -50,  // Centers vertically: translateY(-50%)
                 left: 0,
+                opacity: 0,  // Start hidden, reveal after positioning
                 visibility: 'visible'
             });
         });
@@ -261,14 +262,14 @@ export default function Hero() {
                 const scale = 0.8 + (0.2 * normDist);
 
                 if (revealCards) {
-                    gsap.set(card, { scale, autoAlpha: 1, zIndex: Math.round(normDist * 100) });
+                    gsap.set(card, { scale, opacity: 1, zIndex: Math.round(normDist * 100) });
                 } else {
                     gsap.set(card, { scale, zIndex: Math.round(normDist * 100) });
                 }
             });
         };
 
-        // Initial reveal
+        // Reveal cards after positioning
         updateScales(true);
 
         // Wrap utility for horizontal - uses stored animation params for consistency
@@ -330,56 +331,70 @@ export default function Hero() {
         // Start animation
         gsap.delayedCall(1.2, animateNextStep);
 
-        // Resize handler for horizontal - smooth repositioning without hiding
+        // Resize handler for horizontal - PAUSE animation, reposition, then resume
+        let resizeTimeout: NodeJS.Timeout | null = null;
+        
         const handleResize = () => {
             const newMode = getLayoutMode(window.innerWidth);
             if (newMode !== 'desktop' && newMode !== 'mobile') return;
 
-            const newDims = getDimensions();
-            const newCardWidth = newDims.cardWidth;
-            const newGap = newDims.cardGap;
-            const newStep = newCardWidth + newGap;
-            const newContainerWidth = sliderContainer.offsetWidth;
-            const newFocusPointX = newContainerWidth / 2;
-            const newInitialOffset = newFocusPointX - newCardWidth / 2;
+            // Debounce resize handling
+            if (resizeTimeout) clearTimeout(resizeTimeout);
+            
+            // Pause animation during resize
+            animationStateRef.current.isAnimating = false;
+            gsap.killTweensOf(cards);
 
-            // Update stored params
-            animationStateRef.current.animParams = {
-                step: newStep,
-                totalSpan: newStep * totalCards,
-                cardSize: newCardWidth,
-                gap: newGap
-            };
+            resizeTimeout = setTimeout(() => {
+                const newDims = getDimensions();
+                const newCardWidth = newDims.cardWidth;
+                const newGap = newDims.cardGap;
+                const newStep = newCardWidth + newGap;
+                const newContainerWidth = sliderContainer.offsetWidth;
+                const newFocusPointX = newContainerWidth / 2;
+                const newInitialOffset = newFocusPointX - newCardWidth / 2;
 
-            // Find closest card to center (maintains visual continuity)
-            const containerRect = sliderContainer.getBoundingClientRect();
-            const centerX = containerRect.left + newFocusPointX;
-            let closestCardIndex = 0;
-            let closestDistance = Infinity;
+                // Update stored params
+                animationStateRef.current.animParams = {
+                    step: newStep,
+                    totalSpan: newStep * totalCards,
+                    cardSize: newCardWidth,
+                    gap: newGap
+                };
 
-            cards.forEach((card, i) => {
-                const rect = card.getBoundingClientRect();
-                const cardCenter = rect.left + rect.width / 2;
-                const dist = Math.abs(centerX - cardCenter);
-                if (dist < closestDistance) {
-                    closestDistance = dist;
-                    closestCardIndex = i;
-                }
-            });
+                // Find closest card to center (maintains visual continuity)
+                const containerRect = sliderContainer.getBoundingClientRect();
+                const centerX = containerRect.left + newFocusPointX;
+                let closestCardIndex = 0;
+                let closestDistance = Infinity;
 
-            // Reposition relative to closest - NO hiding, smooth transition
-            cards.forEach((card, i) => {
-                let relativePos = i - closestCardIndex;
-                const halfCards = Math.floor(totalCards / 2);
-                if (relativePos > halfCards) relativePos -= totalCards;
-                else if (relativePos < -halfCards) relativePos += totalCards;
+                cards.forEach((card, i) => {
+                    const rect = card.getBoundingClientRect();
+                    const cardCenter = rect.left + rect.width / 2;
+                    const dist = Math.abs(centerX - cardCenter);
+                    if (dist < closestDistance) {
+                        closestDistance = dist;
+                        closestCardIndex = i;
+                    }
+                });
 
-                const xPos = newInitialOffset + relativePos * newStep;
-                // Smooth reposition without hiding
-                gsap.set(card, { x: xPos });
-            });
+                // Reposition relative to closest
+                cards.forEach((card, i) => {
+                    let relativePos = i - closestCardIndex;
+                    const halfCards = Math.floor(totalCards / 2);
+                    if (relativePos > halfCards) relativePos -= totalCards;
+                    else if (relativePos < -halfCards) relativePos += totalCards;
 
-            updateScales(false);
+                    const xPos = newInitialOffset + relativePos * newStep;
+                    gsap.set(card, { x: xPos });
+                });
+
+                updateScales(false);
+
+                // Resume animation
+                animationStateRef.current.isAnimating = true;
+                gsap.delayedCall(0.5, animateNextStep);
+            }, 150); // Debounce delay
         };
 
         window.addEventListener("resize", handleResize);
@@ -389,6 +404,7 @@ export default function Hero() {
             if (animationStateRef.current.tickerFunc) {
                 gsap.ticker.remove(animationStateRef.current.tickerFunc);
             }
+            if (resizeTimeout) clearTimeout(resizeTimeout);
             window.removeEventListener("resize", handleResize);
             gsap.killTweensOf(cards);
         };
@@ -421,28 +437,44 @@ export default function Hero() {
         const containerHeight = sliderContainer.offsetHeight;
         const containerWidth = sliderContainer.offsetWidth;
         const focusPointY = containerHeight / 2;
-        const initialOffset = focusPointY - cardHeight / 2;
 
         // Center cards horizontally
         const centerX = (containerWidth - cardWidth) / 2;
 
-        // Position all cards
-        cards.forEach((card, i) => {
-            let relativePos = i - 1;
-            const halfCards = Math.floor(totalCards / 2);
-            if (relativePos >= halfCards) {
-                relativePos -= totalCards;
+        // Helper: Normalize Y position using modular arithmetic (no infinite loops)
+        const normalizeY = (y: number, contHeight: number, cardH: number, g: number, totalH: number): number => {
+            // First, bring into [0, totalH) range using modulo
+            let normalized = ((y % totalH) + totalH) % totalH;
+            
+            // Shift so cards are positioned around the visible area
+            // We want cards to be in range roughly [-cardH, contHeight + cardH]
+            // If normalized puts card too far down, shift it up by totalH
+            if (normalized > contHeight + cardH + g) {
+                normalized -= totalH;
             }
-            const yPos = initialOffset + relativePos * step;
+            
+            return normalized;
+        };
 
-            // Clear previous transforms and set fresh positions for vertical mode
-            gsap.set(card, { clearProps: "x,y,xPercent,yPercent,top,left,scale,transform" });
+        // Position cards: distribute them evenly, starting with card 1 at center
+        // Use simple sequential positioning, then normalize
+        cards.forEach((card, i) => {
+            // Card 1 at center, others distributed around it
+            const offsetFromCenter = (i - 1) * step;
+            const baseY = focusPointY - cardHeight / 2 + offsetFromCenter;
+            
+            // Normalize to valid range
+            const yPos = normalizeY(baseY, containerHeight, cardHeight, gap, totalHeight);
+
+            // Clear previous transforms and set fresh positions
+            gsap.set(card, { clearProps: "x,y,xPercent,yPercent,top,left,scale,transform,opacity,visibility" });
             gsap.set(card, {
                 x: centerX,
                 y: yPos,
-                top: 0,      // Override CSS top: 50%
-                yPercent: 0, // No percentage offset for vertical
+                top: 0,
+                yPercent: 0,
                 left: 0,
+                opacity: 0,  // Start hidden, reveal after positioning
                 visibility: 'visible'
             });
         });
@@ -464,17 +496,17 @@ export default function Hero() {
                 const scale = 0.8 + (0.2 * normDist);
 
                 if (revealCards) {
-                    gsap.set(card, { scale, autoAlpha: 1, zIndex: Math.round(normDist * 100) });
+                    gsap.set(card, { scale, opacity: 1, zIndex: Math.round(normDist * 100) });
                 } else {
                     gsap.set(card, { scale, zIndex: Math.round(normDist * 100) });
                 }
             });
         };
 
-        // Initial reveal
+        // Reveal cards after positioning
         updateScales(true);
 
-        // Wrap utility for vertical - uses stored animation params for consistency
+        // Wrap utility for vertical - uses modular arithmetic
         const wrapCards = () => {
             const params = animationStateRef.current.animParams;
             if (!params) return;
@@ -483,14 +515,10 @@ export default function Hero() {
 
             cards.forEach((card) => {
                 const currentY = gsap.getProperty(card, "y") as number;
-
-                // Wrap top: if card's bottom edge is above top edge of container
-                if (currentY < -(params.cardSize + params.gap)) {
-                    gsap.set(card, { y: currentY + params.totalSpan });
-                }
-                // Wrap bottom: if card's top edge is below bottom edge of container + buffer
-                else if (currentY > currentContainerHeight + params.gap) {
-                    gsap.set(card, { y: currentY - params.totalSpan });
+                const normalized = normalizeY(currentY, currentContainerHeight, params.cardSize, params.gap, params.totalSpan);
+                
+                if (Math.abs(normalized - currentY) > 1) {
+                    gsap.set(card, { y: normalized });
                 }
             });
         };
@@ -531,58 +559,71 @@ export default function Hero() {
         // Start animation
         gsap.delayedCall(1.2, animateNextStep);
 
-        // Resize handler for vertical - smooth repositioning without hiding
+        // Resize handler - PAUSE animation, reposition, then resume
+        let resizeTimeout: NodeJS.Timeout | null = null;
+        
         const handleResize = () => {
             const newMode = getLayoutMode(window.innerWidth);
             if (newMode !== 'tablet') return;
 
-            const newDims = getDimensions();
-            const newCardHeight = newDims.cardHeight;
-            const newCardWidth = newDims.cardWidth;
-            const newGap = newDims.cardGap;
-            const newStep = newCardHeight + newGap;
-            const newContainerHeight = sliderContainer.offsetHeight;
-            const newContainerWidth = sliderContainer.offsetWidth;
-            const newFocusPointY = newContainerHeight / 2;
-            const newInitialOffset = newFocusPointY - newCardHeight / 2;
-            const newCenterX = (newContainerWidth - newCardWidth) / 2;
+            // Debounce resize handling
+            if (resizeTimeout) clearTimeout(resizeTimeout);
+            
+            // Pause animation during resize
+            animationStateRef.current.isAnimating = false;
+            gsap.killTweensOf(cards);
 
-            // Update stored params
-            animationStateRef.current.animParams = {
-                step: newStep,
-                totalSpan: newStep * totalCards,
-                cardSize: newCardHeight,
-                gap: newGap
-            };
+            resizeTimeout = setTimeout(() => {
+                const newDims = getDimensions();
+                const newCardHeight = newDims.cardHeight;
+                const newCardWidth = newDims.cardWidth;
+                const newGap = newDims.cardGap;
+                const newStep = newCardHeight + newGap;
+                const newTotalHeight = totalCards * newStep;
+                const newContainerHeight = sliderContainer.offsetHeight;
+                const newContainerWidth = sliderContainer.offsetWidth;
+                const newFocusPointY = newContainerHeight / 2;
+                const newCenterX = (newContainerWidth - newCardWidth) / 2;
 
-            // Find closest card to center
-            const containerRect = sliderContainer.getBoundingClientRect();
-            const centerY = containerRect.top + newFocusPointY;
-            let closestCardIndex = 0;
-            let closestDistance = Infinity;
+                // Update stored params
+                animationStateRef.current.animParams = {
+                    step: newStep,
+                    totalSpan: newTotalHeight,
+                    cardSize: newCardHeight,
+                    gap: newGap
+                };
 
-            cards.forEach((card, i) => {
-                const rect = card.getBoundingClientRect();
-                const cardCenter = rect.top + rect.height / 2;
-                const dist = Math.abs(centerY - cardCenter);
-                if (dist < closestDistance) {
-                    closestDistance = dist;
-                    closestCardIndex = i;
-                }
-            });
+                // Find closest card to center (maintains visual continuity)
+                const containerRect = sliderContainer.getBoundingClientRect();
+                const centerY = containerRect.top + newFocusPointY;
+                let closestCardIndex = 0;
+                let closestDistance = Infinity;
 
-            // Reposition relative to closest - NO hiding, smooth transition
-            cards.forEach((card, i) => {
-                let relativePos = i - closestCardIndex;
-                const halfCards = Math.floor(totalCards / 2);
-                if (relativePos > halfCards) relativePos -= totalCards;
-                else if (relativePos < -halfCards) relativePos += totalCards;
+                cards.forEach((card, i) => {
+                    const rect = card.getBoundingClientRect();
+                    const cardCenter = rect.top + rect.height / 2;
+                    const dist = Math.abs(centerY - cardCenter);
+                    if (dist < closestDistance) {
+                        closestDistance = dist;
+                        closestCardIndex = i;
+                    }
+                });
 
-                const yPos = newInitialOffset + relativePos * newStep;
-                gsap.set(card, { x: newCenterX, y: yPos });
-            });
+                // Reposition all cards relative to closest
+                cards.forEach((card, i) => {
+                    const offsetFromClosest = (i - closestCardIndex) * newStep;
+                    const baseY = newFocusPointY - newCardHeight / 2 + offsetFromClosest;
+                    const yPos = normalizeY(baseY, newContainerHeight, newCardHeight, newGap, newTotalHeight);
+                    
+                    gsap.set(card, { x: newCenterX, y: yPos });
+                });
 
-            updateScales(false);
+                updateScales(false);
+
+                // Resume animation
+                animationStateRef.current.isAnimating = true;
+                gsap.delayedCall(0.5, animateNextStep);
+            }, 150); // Debounce delay
         };
 
         window.addEventListener("resize", handleResize);
@@ -592,6 +633,7 @@ export default function Hero() {
             if (animationStateRef.current.tickerFunc) {
                 gsap.ticker.remove(animationStateRef.current.tickerFunc);
             }
+            if (resizeTimeout) clearTimeout(resizeTimeout);
             window.removeEventListener("resize", handleResize);
             gsap.killTweensOf(cards);
         };
@@ -741,12 +783,13 @@ export default function Hero() {
 
                         // Quick fade out, reposition, fade in (minimal flicker)
                         gsap.to(cards, {
-                            autoAlpha: 0,
+                            opacity: 0,
                             duration: 0.15,
                             ease: "power2.out",
                             onComplete: () => {
                                 // Initialize new slider (which will reveal cards)
                                 animationStateRef.current.currentMode = newMode;
+                                animationStateRef.current.isAnimating = true;
                                 const newDims = getDimensions();
 
                                 if (newMode === 'desktop' || newMode === 'mobile') {
