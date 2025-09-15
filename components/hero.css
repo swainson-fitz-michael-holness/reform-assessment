@@ -3,11 +3,13 @@
 /* --- Variables based on Design Tokens --- */
 :root {
   --c-black-200: #081e13;
+  --c-green-400: #30715d;
+  --c-green-500: #153e2a;
   --c-green-200: #00b684; /* The Active Green */
   --c-green-100: #ccddc7;
   --c-off-white: #fbfaf6;
   --c-orange: #d87906;
-  --c-green-500: #153e2a;
+
   --f-sohne: var(--font-sohne), "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
