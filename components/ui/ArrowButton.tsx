@@ -2,8 +2,8 @@
 import React, { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { ArrowRight } from "lucide-react";
 import "./arrowButton.css";
+import { ArrowSvg } from "../../public/component-svg/ArrowSvg";
 
 interface ArrowButtonProps {
     text: string;
@@ -42,15 +42,22 @@ export default function ArrowButton({ text, onClick }: ArrowButtonProps) {
 
     return (
         <>
-            <button
-                ref={containerRef}
-                onMouseEnter={onMouseEnter}
-                onMouseLeave={onMouseLeave}
-                onClick={onClick}
-                className="button-core"
-            >
-                <span>{text}</span>
-            </button>
+            <div className="button-wrapper">
+                <a
+
+                    onMouseEnter={onMouseEnter}
+                    onMouseLeave={onMouseLeave}
+                    onClick={onClick}
+                    className="button-core"
+                >
+                    <span>{text}</span>
+
+                </a>
+                <span>
+                    <ArrowSvg />
+                </span>
+            </div>
+
         </>
 
     );

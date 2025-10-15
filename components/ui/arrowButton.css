@@ -21,6 +21,11 @@
 
   /* Inside auto layout */
   flex: none;
-  order: 1;
   flex-grow: 0;
+}
+
+.button-wrapper {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
 }
