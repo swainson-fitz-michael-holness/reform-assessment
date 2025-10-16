@@ -1,31 +1,47 @@
+/* arrowButton.css */
+
+.button-wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+}
+
 .button-core {
+  position: relative;
+  z-index: 2;
   font-size: 1em;
   color: var(--c-green-400);
-  border: 1px solid var(--c-green-400);
+  background: var(--c-off-white);
   height: 50px;
-  padding: 0 25px;
-  border-radius: 12px;
-  align-self: flex-start;
-  
+  cursor: pointer;
+
   /* Auto layout */
   display: flex;
   flex-direction: row;
   align-items: center;
+  justify-content: center;
   padding: 0px 24px;
   gap: 12px;
-  height: 50px;
 
-  /* Primary/Green 400 */
+  /* Border */
   border: 0.75px solid var(--c-green-400);
   border-radius: 25px;
 
-  /* Inside auto layout */
-  flex: none;
-  flex-grow: 0;
+  /* Prevent layout shift during animation */
+  flex-shrink: 0;
+  white-space: nowrap;
+
+  /* Performance */
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
-.button-wrapper {
-    display: flex;
-    flex-direction: row;
-    gap: 4px;
+.arrow-container {
+  /* Performance */
+  will-change: transform;
+  backface-visibility: hidden;
 }
+
+

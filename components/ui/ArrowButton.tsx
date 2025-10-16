@@ -11,54 +11,62 @@ interface ArrowButtonProps {
 }
 
 export default function ArrowButton({ text, onClick }: ArrowButtonProps) {
-    const containerRef = useRef<HTMLButtonElement>(null);
-    const circleRef = useRef<HTMLDivElement>(null);
+    const wrapperRef = useRef<HTMLDivElement>(null);
+    const buttonRef = useRef<HTMLButtonElement>(null);
     const arrowRef = useRef<HTMLDivElement>(null);
 
-    const { contextSafe } = useGSAP({ scope: containerRef });
+    const { contextSafe } = useGSAP({ scope: wrapperRef });
 
     const onMouseEnter = contextSafe(() => {
-        // Move circle right
-        gsap.to(circleRef.current, {
-            x: 4,
-            duration: 0.3,
+        if (!buttonRef.current || !arrowRef.current) return;
+
+        const buttonWidth = buttonRef.current.offsetWidth;
+        const arrowWidth = arrowRef.current.offsetWidth;
+        const gap = 4; // matches CSS gap
+
+        // Arrow moves left (behind the button)
+        gsap.to(arrowRef.current, {
+            x: -(buttonWidth + gap),
+            duration: 0.4,
             ease: "power2.out"
         });
-        // Move arrow slightly more right inside the circle
-        gsap.to(arrowRef.current, {
-            x: 2,
-            duration: 0.3,
+
+        // Button moves right (to where arrow was)
+        gsap.to(buttonRef.current, {
+            x: arrowWidth + gap,
+            duration: 0.4,
             ease: "power2.out"
         });
     });
 
     const onMouseLeave = contextSafe(() => {
-        gsap.to([circleRef.current, arrowRef.current], {
+        // Reset both to original positions
+        gsap.to([buttonRef.current, arrowRef.current], {
             x: 0,
-            duration: 0.3,
+            duration: 0.4,
             ease: "power2.out"
         });
     });
 
     return (
-        <>
-            <div className="button-wrapper">
-                <a
+        <div
+            ref={wrapperRef}
+            className="button-wrapper"
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+            onTouchEnd={onMouseLeave}
+        >
+            <button
+                ref={buttonRef}
+                onClick={onClick}
+                className="button-core"
+            >
+                <span>{text}</span>
+            </button>
 
-                    onMouseEnter={onMouseEnter}
-                    onMouseLeave={onMouseLeave}
-                    onClick={onClick}
-                    className="button-core"
-                >
-                    <span>{text}</span>
-
-                </a>
-                <span>
-                    <ArrowSvg />
-                </span>
+            <div ref={arrowRef} >
+                <ArrowSvg />
             </div>
-
-        </>
-
+        </div>
     );
 }
