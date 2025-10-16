@@ -18,7 +18,7 @@
   font-size: 1em;
   color: var(
     --c-green-400
-  ); /* Ensure these variables exist in your global CSS */
+  ); 
   background: var(--c-off-white);
   height: 50px;
   cursor: pointer;
@@ -62,7 +62,6 @@
   justify-content: center;
 }
 
-/* CRITICAL: Explicitly set SVG size so wrapper doesn't explode */
 .arrow-container svg {
   display: block;
   width: 51px; /* Matches viewBox width or slightly smaller */
@@ -74,7 +73,6 @@
   stroke: var(--c-green-400);
 }
 
-/* Hover state applies to BOTH elements when wrapper is hovered */
 .button-wrapper:hover .button-core {
   border-color: var(--c-green-200);
   color: var(--c-green-200);
