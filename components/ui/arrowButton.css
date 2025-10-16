@@ -1,18 +1,24 @@
 /* arrowButton.css */
 
 .button-wrapper {
-  display: flex;
+  /* Fits the content tightly */
+  display: inline-flex;
   flex-direction: row;
   align-items: center;
   gap: 4px;
   position: relative;
+
+  /* Prevents stretching in flex columns */
+  width: fit-content;
 }
 
 .button-core {
   position: relative;
   z-index: 2;
   font-size: 1em;
-  color: var(--c-green-400);
+  color: var(
+    --c-green-400
+  ); /* Ensure these variables exist in your global CSS */
   background: var(--c-off-white);
   height: 50px;
   cursor: pointer;
@@ -36,12 +42,44 @@
   /* Performance */
   will-change: transform;
   backface-visibility: hidden;
+
+  /* Smooth color transition */
+  transition: border-color 0.2s ease, color 0.2s ease;
+
+  /* Ensure button doesn't stretch */
+  width: auto;
 }
 
 .arrow-container {
   /* Performance */
   will-change: transform;
   backface-visibility: hidden;
+  cursor: pointer;
+
+  /* Layout */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* CRITICAL: Explicitly set SVG size so wrapper doesn't explode */
+.arrow-container svg {
+  display: block;
+  width: 51px; /* Matches viewBox width or slightly smaller */
+  height: 51px;
+}
 
+.arrow-container svg path {
+  transition: stroke 0.2s ease;
+  stroke: var(--c-green-400);
+}
+
+/* Hover state applies to BOTH elements when wrapper is hovered */
+.button-wrapper:hover .button-core {
+  border-color: var(--c-green-200);
+  color: var(--c-green-200);
+}
+
+.button-wrapper:hover .arrow-container svg path {
+  stroke: var(--c-green-200);
+}
