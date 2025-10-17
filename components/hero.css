@@ -42,6 +42,10 @@
   margin-right: auto;
 }
 
+.headline-wrapper {
+    height: 268px
+}
+
 /* --- Typography --- */
 .hero-title {
   font-family: var(--f-sohne);
@@ -213,6 +217,7 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+    margin-bottom: 0;
   }
 
   /* Remove the forced line break on mobile */
