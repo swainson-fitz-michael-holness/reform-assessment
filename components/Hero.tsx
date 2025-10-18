@@ -8,6 +8,8 @@ import { AlertCircle, FileQuestion, Ban, Timer } from "lucide-react";
 import Image from "next/image";
 import "./hero.css";
 
+console.log("Initialized");
+
 const MARQUEE_ITEMS = [
     { text: "UNPREDICTABLE RATE INCREASES", icon: <AlertCircle size="1em" /> },
     { text: "LACK OF TRANSPARENCY", icon: <Ban size="1em" /> },
