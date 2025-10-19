@@ -3,7 +3,6 @@ import React, { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import "./arrowButton.css";
-// Adjust this import path based on your file structure
 import { ArrowSvg } from "../../public/component-svg/ArrowSvg";
 
 interface ArrowButtonProps {

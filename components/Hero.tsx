@@ -8,7 +8,10 @@ import { AlertCircle, FileQuestion, Ban, Timer } from "lucide-react";
 import Image from "next/image";
 import "./hero.css";
 
-console.log("Initialized");
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(CustomEase);
+  console.log("Pugins Initialized");
+}
 
 const MARQUEE_ITEMS = [
     { text: "UNPREDICTABLE RATE INCREASES", icon: <AlertCircle size="1em" /> },
