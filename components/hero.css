@@ -43,7 +43,7 @@
 }
 
 .headline-wrapper {
-    height: 268px
+  height: 268px;
 }
 
 /* --- Typography --- */
@@ -202,10 +202,16 @@
   }
 
   /* Ensure both take full width */
-  .hero-text-side,
+
   .hero-slider-side {
     width: 100%;
     border: 1px solid #e5e5e5;
+  }
+
+  .hero-text-side {
+    width: 100%;
+    border: 1px solid #e5e5e5;
+    border-top: none;
   }
 
   .hero-title {
