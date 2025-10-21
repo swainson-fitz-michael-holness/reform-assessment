@@ -7,6 +7,7 @@ import ArrowButton from "./ui/ArrowButton";
 import { AlertCircle, FileQuestion, Ban, Timer } from "lucide-react";
 import Image from "next/image";
 import "./hero.css";
+import { IlloSvg } from "../public/component-svg/IlloSvg";
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(CustomEase);
@@ -14,10 +15,10 @@ if (typeof window !== 'undefined') {
 }
 
 const MARQUEE_ITEMS = [
-    { text: "UNPREDICTABLE RATE INCREASES", icon: <AlertCircle size="1em" /> },
-    { text: "LACK OF TRANSPARENCY", icon: <Ban size="1em" /> },
-    { text: "IMPLEMENTATION HEADACHES", icon: <Timer size="1em" /> },
-    { text: "FRUSTRATED USERS", icon: <FileQuestion size="1em" /> },
+    { text: "UNPREDICTABLE RATE INCREASES", icon: <IlloSvg /> },
+    { text: "LACK OF TRANSPARENCY", icon: <IlloSvg />  },
+    { text: "IMPLEMENTATION HEADACHES", icon: <IlloSvg />  },
+    { text: "FRUSTRATED USERS", icon: <IlloSvg />  },
 ];
 
 const CARDS = [
@@ -845,7 +846,6 @@ export default function Hero() {
                                     <div key={i} className="marquee-item">
                                         <span>{item.icon}</span>
                                         <span>{item.text}</span>
-                                        <span className="opacity-30">|</span>
                                     </div>
                                 ))}
                             </div>
