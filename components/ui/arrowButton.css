@@ -16,9 +16,7 @@
   position: relative;
   z-index: 2;
   font-size: 1em;
-  color: var(
-    --c-green-400
-  ); 
+  color: var(--c-green-400);
   background: var(--c-off-white);
   height: 50px;
   cursor: pointer;
@@ -64,7 +62,7 @@
 
 .arrow-container svg {
   display: block;
-  width: 51px; /* Matches viewBox width or slightly smaller */
+  width: 51px;
   height: 51px;
 }
 
@@ -80,4 +78,109 @@
 
 .button-wrapper:hover .arrow-container svg path {
   stroke: var(--c-green-200);
+}
+
+/* ================================================== */
+/* MOBILE: < 501px                                    */
+/* Proportional scaling based on 500px reference      */
+/* ================================================== */
+@media (max-width: 500px) {
+  .button-wrapper {
+    /* 4px gap at 500px */
+    gap: calc(4 / 500 * 100vw);
+  }
+
+  .button-core {
+    /* 40px height at 500px */
+    height: calc(40 / 500 * 100vw);
+    /* 16px horizontal padding at 500px */
+    padding: 0 calc(16 / 500 * 100vw);
+    /* 20px border-radius at 500px */
+    border-radius: calc(20 / 500 * 100vw);
+    /* 14px font-size at 500px */
+    font-size: calc(14 / 500 * 100vw);
+  }
+
+  .arrow-container svg {
+    /* 40px at 500px */
+    width: calc(40 / 500 * 100vw);
+    height: calc(40 / 500 * 100vw);
+  }
+}
+
+/* ================================================== */
+/* TABLET: 501px - 1024px                             */
+/* Proportional scaling based on 1024px               */
+/* ================================================== */
+@media (min-width: 501px) and (max-width: 1024px) {
+  .button-wrapper {
+    /* 4px gap at 1024px */
+    gap: calc(4 / 1024 * 100vw);
+  }
+
+  .button-core {
+    /* 50px height at 1024px */
+    height: calc(50 / 1024 * 100vw);
+    /* 24px horizontal padding at 1024px */
+    padding: 0 calc(24 / 1024 * 100vw);
+    /* 25px border-radius at 1024px */
+    border-radius: calc(25 / 1024 * 100vw);
+    /* 16px font-size at 1024px */
+    font-size: calc(16 / 1024 * 100vw);
+  }
+
+  .arrow-container svg {
+    /* 51px at 1024px */
+    width: calc(51 / 1024 * 100vw);
+    height: calc(51 / 1024 * 100vw);
+  }
+}
+
+/* ================================================== */
+/* PROPORTIONAL SCALING: 1025px - 1439px              */
+/* Everything scales relative to 1440px base          */
+/* ================================================== */
+@media (min-width: 1025px) and (max-width: 1439px) {
+  .button-wrapper {
+    /* 4px gap at 1440px */
+    gap: calc(4 / 1440 * 100vw);
+  }
+
+  .button-core {
+    /* 50px height at 1440px */
+    height: calc(50 / 1440 * 100vw);
+    /* 24px horizontal padding at 1440px */
+    padding: 0 calc(24 / 1440 * 100vw);
+    /* 25px border-radius at 1440px */
+    border-radius: calc(25 / 1440 * 100vw);
+    /* 16px font-size at 1440px */
+    font-size: calc(16 / 1440 * 100vw);
+  }
+
+  .arrow-container svg {
+    /* 51px at 1440px */
+    width: calc(51 / 1440 * 100vw);
+    height: calc(51 / 1440 * 100vw);
+  }
+}
+
+/* ================================================== */
+/* DESKTOP: 1440px and above (fixed values)           */
+/* ================================================== */
+@media (min-width: 1440px) {
+  .button-wrapper {
+    gap: 4px;
+  }
+
+  .button-core {
+    height: 50px;
+    padding: 0 24px;
+    border-radius: 25px;
+    font-size: 16px;
+  }
+
+  .arrow-container svg {
+    width: 51px;
+    height: 51px;
+  }
 }
