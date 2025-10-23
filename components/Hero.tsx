@@ -65,7 +65,7 @@ export default function Hero() {
         // The marquee swells slightly in width before collapsing
         tl.to(marqueeWrapperRef.current, {
             width: "670px", // Expand slightly from 662px
-            duration: 1.0,
+            duration: 0.7,
             ease: "sine.in",
         });
 
@@ -77,7 +77,7 @@ export default function Hero() {
         tl.to(marqueeWrapperRef.current, {
             width: 0,
             marginLeft: 0,
-            marginRight: 0,
+            marginRight: 18,
             padding: 0,
             duration: 1.0,
             ease: CustomEase.create("custom", "M0,0 C0.482,0 0.798,0.419 0.844,0.588 0.911,0.836 0.915,0.935 1,1 "),
@@ -105,7 +105,7 @@ export default function Hero() {
             transform: "skew(-12deg)", // Final "Italic" feel
             duration: 0.3,
             ease: "back.out(1.7)" // The "Impact" bounce
-        }, ">-0.0"); // Start just before the previous skew fully finishes
+        }, ">-0.07"); // Start just before the previous skew fully finishes
 
     }, { scope: containerRef });
 
