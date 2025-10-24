@@ -111,31 +111,32 @@ export default function Hero() {
 
     return (
         <section ref={containerRef} className="hero-section">
-            <div className="hero-container">
 
-                {/* HEADLINE */}
-                <h1 className="hero-title">
-                    Health insurance that <span ref={textRef1} className="anim-text">doesn&apos;t</span> <br />
+            {/* HEADLINE */}
+            <h1 className="hero-title">
+                Health insurance that <span ref={textRef1} className="anim-text">doesn&apos;t</span> <br />
 
-                    <span className="whitespace-nowrap">
-                        <span ref={textRef2} className="anim-text">get in</span>
+                <span className="whitespace-nowrap">
+                    <span ref={textRef2} className="anim-text">get in</span>
 
-                        {/* COLLAPSIBLE MARQUEE */}
-                        <div ref={marqueeWrapperRef} className="marquee-wrapper">
-                            <div ref={marqueeTrackRef} className="marquee-track">
-                                {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, i) => (
-                                    <div key={i} className="marquee-item">
-                                        <span>{item.icon}</span>
-                                        <span>{item.text}</span>
-                                        <span className="opacity-30">|</span>
-                                    </div>
-                                ))}
-                            </div>
+                    {/* COLLAPSIBLE MARQUEE */}
+                    <div ref={marqueeWrapperRef} className="marquee-wrapper">
+                        <div ref={marqueeTrackRef} className="marquee-track">
+                            {[...MARQUEE_ITEMS, ...MARQUEE_ITEMS].map((item, i) => (
+                                <div key={i} className="marquee-item">
+                                    <span>{item.icon}</span>
+                                    <span>{item.text}</span>
+                                    <span className="opacity-30">|</span>
+                                </div>
+                            ))}
                         </div>
+                    </div>
 
-                        <span ref={textRef3} className="anim-text">the way.</span>
-                    </span>
-                </h1>
+                    <span ref={textRef3} className="anim-text">the way.</span>
+                </span>
+            </h1>
+            
+            <div className="hero-container">
 
                 {/* SUBTEXT & CTA */}
                 <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-10">
