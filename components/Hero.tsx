@@ -541,6 +541,8 @@ export default function Hero() {
                 {
                     width: 0,
                     height: 0,
+                    opacity: 0,
+                    display: "none",
                     duration: 1.0,
                     ease: collapseEase,
                 },
@@ -553,7 +555,8 @@ export default function Hero() {
                 {
                     width: 0,
                     marginLeft: 0,
-                    marginRight: 18,
+                    opacity: 0,
+                    display: "none",
                     padding: 0,
                     duration: 1.0,
                     ease: collapseEase,
@@ -793,7 +796,7 @@ export default function Hero() {
                     <br className="hero-line-break" />
 
                     <span className="whitespace-nowrap">
-                        <span ref={textRef2} className="anim-text">get</span>
+                        <span ref={textRef2} className="anim-text anim-text-get">get</span>
 
                         {/* COLLAPSIBLE MARQUEE - Will be removed from DOM after animation */}
                         <div ref={marqueeWrapperRef} className="marquee-wrapper">
