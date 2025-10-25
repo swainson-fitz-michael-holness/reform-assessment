@@ -124,23 +124,23 @@
 }
 
 /* --- Bottom Card Slider --- */
-.card-slider-section {
+/* .card-slider-section {
   margin-top: 8rem;
   width: 100%;
   border-top: 1px solid #e5e5e5;
   border-bottom: 1px solid #e5e5e5;
   padding: 2rem 0;
   background-color: var(--c-off-white);
-}
+} */
 
-.card-track {
+/* .card-track {
   display: flex;
   gap: 2rem;
   padding-left: 1rem;
-  width: max-content; /* Force horizontal */
-}
+  width: max-content; 
+} */
 
-.card-item {
+/* .card-item {
   position: relative;
   flex-shrink: 0;
   width: 300px;
@@ -149,11 +149,103 @@
   overflow: hidden;
   background-color: white;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
-}
+} */
 
-@media (min-width: 768px) {
+/* @media (min-width: 768px) {
   .card-item {
     width: 450px;
     height: 260px;
+  }
+} */
+
+/* ======================= */
+/* Part 2 */
+/* ======================= */
+/* --- Content Grid (Split Layout) --- */
+.hero-content-wrapper {
+  display: grid;
+  grid-template-columns: 1fr;
+  margin-top: 4rem;
+  border-top: 1px solid #E5E5E5;
+  /* border-bottom: 1px solid #E5E5E5; Optional based on preference */
+}
+
+@media (min-width: 1024px) {
+  .hero-content-wrapper {
+    grid-template-columns: 40% 60%; /* Text takes 40%, Slider 60% */
+    border-bottom: none; 
+  }
+}
+
+/* --- Left Column: Text & CTA --- */
+.hero-text-side {
+  padding: 3rem 1.5rem 3rem 0;
+  border-right: none;
+}
+
+@media (min-width: 1024px) {
+  .hero-text-side {
+    padding: 4rem 3rem 4rem 0;
+    border-right: 1px solid #E5E5E5; /* The vertical divider */
+  }
+}
+
+.hero-description {
+  font-family: var(--f-sohne);
+  font-size: 1.25rem; /* ~20px Body Reg/L */
+  line-height: 1.5;
+  color: var(--c-black-200);
+  margin-bottom: 2.5rem;
+  max-width: 440px;
+}
+
+@media (min-width: 768px) {
+  .hero-description {
+    font-size: 1.5rem; /* ~24px */
+  }
+}
+
+/* --- Right Column: The Infinite Slider --- */
+.hero-slider-side {
+  position: relative;
+  width: 100%;
+  overflow: hidden; /* Hide the overflow but keep internal visible */
+  display: flex;
+  align-items: center;
+  padding: 3rem 0;
+  /* background: red; Debug color */
+}
+
+.slider-track {
+  position: relative;
+  display: flex;
+  height: 280px; /* Fixed height for the container */
+  width: 100%;
+  align-items: center;
+  /* We don't use flex-gap here because we position absolutely for the loop */
+}
+
+.slider-card {
+  position: absolute; /* Absolute positioning is key for the custom loop logic */
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  
+  width: 320px;
+  height: 190px;
+  border-radius: 12px;
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+  
+  /* Origin center for scaling */
+  transform-origin: center center;
+  will-change: transform;
+}
+
+@media (min-width: 768px) {
+  .slider-card {
+    width: 420px;
+    height: 240px;
   }
 }
