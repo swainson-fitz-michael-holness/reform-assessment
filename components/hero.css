@@ -131,8 +131,8 @@
   display: grid;
   grid-template-columns: 1fr;
   margin-top: 4rem;
-  border: 1px solid #E5E5E5;
-
+  border: 1px solid #e5e5e5;
+  height: 328px;
 }
 
 @media (min-width: 1024px) {
@@ -149,18 +149,20 @@
 
 @media (min-width: 1024px) {
   .hero-text-side {
-    padding: 4rem 3rem 4rem 0;
-    border-right: 1px solid #E5E5E5; /* The vertical divider */
+    padding: 32px 157px 32px 32px;
+    border-right: 1px solid #e5e5e5; /* The vertical divider */
   }
 }
 
 .hero-description {
   font-family: var(--f-sohne);
-  font-size: 1.25rem; /* ~20px Body Reg/L */
+  /* font-size: 1.25rem;  */
+  font-size: 24.00px;
   line-height: 1.5;
-  color: var(--c-black-200);
+  color: var(--c-green-500);
   margin-bottom: 2.5rem;
-  max-width: 440px;
+  line-height: 33.60px;
+  letter-spacing: -0.72px;
 }
 
 @media (min-width: 768px) {
@@ -194,13 +196,13 @@
   top: 50%;
   left: 0;
   transform: translateY(-50%);
-  
+
   width: 493px;
   height: 244px;
   border-radius: 12px;
   background-color: none;
   overflow: hidden;
-  
+
   /* Origin center for scaling */
   transform-origin: center center;
   will-change: transform;
