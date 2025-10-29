@@ -68,8 +68,6 @@
 .anim-text {
   display: inline-block;
   transform-origin: left center;
-  /* transition: color 0.1s ease; */
-  /* Font-style will be handled by GSAP, but ensure backface visibility for smoothness */
   backface-visibility: hidden;
 }
 
@@ -84,8 +82,6 @@
   border: 1px solid var(--c-green-100);
   border-radius: 12px;
 
-  /* Sizing relative to font */
-  /* height: 0.75em; */
   margin: 0 0.2em;
   transform: translateY(0.9em); /* Optical alignment */
 
@@ -116,7 +112,6 @@
   gap: 0.5em;
   padding: 0 1em;
 
-  /* font-size: 0.25em;  */
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -124,8 +119,9 @@
 }
 
 /* ======================= */
-/* Part 2 */
+/* Part 2: Content & Slider */
 /* ======================= */
+
 /* --- Content Grid (Split Layout) --- */
 .hero-content-wrapper {
   display: grid;
@@ -137,7 +133,7 @@
 
 @media (min-width: 1024px) {
   .hero-content-wrapper {
-    grid-template-columns: 1fr 1fr; /* Text takes 40%, Slider 60% */
+    grid-template-columns: 1fr 1fr;
   }
 }
 
@@ -150,7 +146,7 @@
 @media (min-width: 1024px) {
   .hero-text-side {
     padding: 32px 157px 32px 32px;
-    border-right: 1px solid #e5e5e5; /* The vertical divider */
+    border-right: 1px solid #e5e5e5;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -159,18 +155,17 @@
 
 .hero-description {
   font-family: var(--f-sohne);
-  /* font-size: 1.25rem;  */
-  font-size: 24.00px;
+  font-size: 24px;
   line-height: 1.5;
   color: var(--c-green-500);
   margin-bottom: 2.5rem;
-  line-height: 33.60px;
+  line-height: 33.6px;
   letter-spacing: -0.72px;
 }
 
 @media (min-width: 768px) {
   .hero-description {
-    font-size: 1.5rem; /* ~24px */
+    font-size: 1.5rem;
   }
 }
 
@@ -178,42 +173,60 @@
 .hero-slider-side {
   position: relative;
   width: 100%;
-  overflow: hidden; /* Hide the overflow but keep internal visible */
+  overflow: hidden;
   display: flex;
   align-items: center;
-  padding: 3rem 0;
-  /* background: red; Debug color */
+  padding: 2rem 0;
 }
 
-.slider-track {
+/* The relative container for absolutely positioned cards */
+.slider-track-relative {
   position: relative;
-  display: flex;
-  height: 280px; /* Fixed height for the container */
   width: 100%;
-  align-items: center;
-  /* We don't use flex-gap here because we position absolutely for the loop */
+  height: 260px;
 }
 
+/* Individual card styling */
 .slider-card {
-  position: absolute; /* Absolute positioning is key for the custom loop logic */
+  position: absolute;
   top: 50%;
   left: 0;
+  /* translateY handled by GSAP, but we set initial for layout */
   transform: translateY(-50%);
 
-  width: 493px;
+  width: 450px;
   height: 244px;
   border-radius: 12px;
-  background-color: none;
   overflow: hidden;
 
-  /* Origin center for scaling */
+  /* Performance optimizations */
   transform-origin: center center;
-  will-change: transform;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+
+  /* Smooth transitions for scale/opacity (handled by ticker, but this helps) */
+  transition: box-shadow 0.3s ease;
 }
 
-@media (min-width: 768px) {
+/* Subtle shadow on focused card */
+.slider-card:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 1024px) {
   .slider-card {
-    width: 420px;
-    height: 240px;
+    width: 350px;
+    height: 190px;
+  }
+}
+
+@media (max-width: 768px) {
+  .slider-card {
+    width: 280px;
+    height: 156px;
+  }
+
+  .slider-track-relative {
+    height: 180px;
   }
 }
