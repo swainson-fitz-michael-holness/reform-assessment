@@ -20,8 +20,6 @@ const CARDS = [
     { id: 2, src: "/images/img-1.png", alt: "Sunnyside Up" },
     { id: 3, src: "/images/img-2.png", alt: "Bott and Sons" },
     { id: 4, src: "/images/img-3.png", alt: "Another Client" },
-    { id: 5, src: "/images/img-0.png", alt: "Spaw Retreat Copy" },
-    { id: 6, src: "/images/img-1.png", alt: "Sunnyside Up Copy" },
 ];
 
 export default function Hero() {
@@ -100,21 +98,23 @@ export default function Hero() {
             const totalCards = cards.length;
             const totalWidth = totalCards * step;
 
-            // The "focus point" - where the featured card sits
-            // Based on your image, it's roughly 35% from the left of the slider area
+            // The "focus point" - CENTER of the slider
             const containerWidth = sliderContainer.offsetWidth;
-            const focusPointX = containerWidth * 0.35;
+            const focusPointX = containerWidth / 2;
 
-            // Initial positioning: place cards so index 1 (second card) is at focus
-            // This matches your reference image layout
-            const initialOffset = focusPointX - cardWidth / 2 - step; // -step to put card[1] at focus
+            // Initial positioning: center the first card, others follow to the right
+            // We offset by half a card width so the card CENTER aligns with focusPointX
+            // Also shift one card left so there's a visible card on the left side initially
+            const initialOffset = focusPointX - cardWidth / 2;
 
             cards.forEach((card, i) => {
-                const xPos = initialOffset + i * step;
+                // Start with card[1] at center, so card[0] peeks from left
+                // This means we subtract one step from the base position
+                const xPos = initialOffset + (i - 1) * step;
                 gsap.set(card, { x: xPos });
             });
 
-            // Scale & opacity calculation based on distance from focus point
+            // Scale & opacity calculation based on distance from center
             const updateScales = () => {
                 const containerRect = sliderContainer.getBoundingClientRect();
                 const focusPoint = containerRect.left + focusPointX;
@@ -125,15 +125,15 @@ export default function Hero() {
                     const cardCenter = rect.left + rect.width / 2;
 
                     const dist = Math.abs(focusPoint - cardCenter);
-                    const maxDist = 450;
+                    const maxDist = 500;
 
                     // Normalize: 1 at center, 0 at maxDist
                     const normDist = Math.max(0, 1 - dist / maxDist);
 
-                    // Scale: 0.82 base + up to 0.18 bonus at center = 1.0 max
-                    const scale = 0.82 + (0.18 * normDist);
+                    // Scale: 0.8 base + up to 0.2 bonus at center = 1.0 max
+                    const scale = 0.8 + (0.2 * normDist);
                     // Opacity: subtle fade for distant cards
-                    const opacity = 0.65 + (0.35 * normDist);
+                    const opacity = 0.6 + (0.4 * normDist);
 
                     gsap.set(card, {
                         scale: scale,
@@ -146,18 +146,18 @@ export default function Hero() {
             // Initial scale setup
             updateScales();
 
-            // Wrap utility: instantly reposition card to other end
+            // Wrap utility: instantly reposition cards that go off-screen
             const wrapCards = () => {
                 cards.forEach((card) => {
                     const currentX = gsap.getProperty(card, "x") as number;
 
-                    // If card moved too far left, wrap to right
-                    if (currentX < -cardWidth - gap) {
-                        gsap.set(card, { x: currentX + totalWidth });
-                    }
-                    // If card moved too far right, wrap to left
-                    else if (currentX > containerWidth + cardWidth) {
+                    // If card moved too far right (off right edge), wrap to left end
+                    if (currentX > containerWidth) {
                         gsap.set(card, { x: currentX - totalWidth });
+                    }
+                    // If card moved too far left (off left edge), wrap to right end
+                    else if (currentX < -cardWidth - gap) {
+                        gsap.set(card, { x: currentX + totalWidth });
                     }
                 });
             };
@@ -168,12 +168,12 @@ export default function Hero() {
             const animateNextStep = () => {
                 if (!isAnimating) return;
 
-                // Animate all cards left by one step
+                // Animate all cards RIGHT by one step (reversed direction)
                 gsap.to(cards, {
-                    x: `-=${step}`,
+                    x: `+=${step}`,
                     duration: 0.7,
                     ease: "back.inOut(1.7)",
-                    stagger: 0, // All move together
+                    stagger: 0,
                     onComplete: () => {
                         // Wrap cards that went off-screen
                         wrapCards();
