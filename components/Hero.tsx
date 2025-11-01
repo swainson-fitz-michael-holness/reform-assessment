@@ -92,8 +92,8 @@ export default function Hero() {
         const cards = cardsRef.current.filter(Boolean) as HTMLDivElement[];
 
         if (sliderContainer && cards.length > 0) {
-            const cardWidth = 450;
-            const gap = 40;
+            const cardWidth = 493;
+            const gap = 0;
             const step = cardWidth + gap;
             const totalCards = cards.length;
             const totalWidth = totalCards * step;
@@ -171,15 +171,15 @@ export default function Hero() {
                 // Animate all cards RIGHT by one step (reversed direction)
                 gsap.to(cards, {
                     x: `+=${step}`,
-                    duration: 0.7,
-                    ease: "back.inOut(1.7)",
+                    duration: 1.4,
+                    ease: "power4.inOut",
                     stagger: 0,
                     onComplete: () => {
                         // Wrap cards that went off-screen
                         wrapCards();
 
                         // Pause at this position (800ms focus time)
-                        gsap.delayedCall(0.8, animateNextStep);
+                        gsap.delayedCall(5.0, animateNextStep);
                     }
                 });
             };
