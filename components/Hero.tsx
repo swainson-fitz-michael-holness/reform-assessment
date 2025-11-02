@@ -133,7 +133,7 @@ export default function Hero() {
                     // Scale: 0.8 base + up to 0.2 bonus at center = 1.0 max
                     const scale = 0.8 + (0.2 * normDist);
                     // Opacity: subtle fade for distant cards
-                    const opacity = 0.6 + (0.4 * normDist);
+                    const opacity = 1; // could do 0.6 + (0.4 * normDist)
 
                     gsap.set(card, {
                         scale: scale,
