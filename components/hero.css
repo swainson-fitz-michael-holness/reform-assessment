@@ -191,13 +191,15 @@
   position: absolute;
   top: 50%;
   left: 0;
-  /* translateY handled by GSAP, but we set initial for layout */
   transform: translateY(-50%);
 
   width: 493px;
   height: 244px;
   border-radius: 12px;
   overflow: hidden;
+
+  /* CRITICAL: Hide until GSAP positions them */
+  visibility: hidden;
 
   /* Performance optimizations */
   transform-origin: center center;

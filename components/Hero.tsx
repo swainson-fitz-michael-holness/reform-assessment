@@ -107,15 +107,14 @@ export default function Hero() {
             // Also shift one card left so there's a visible card on the left side initially
             const initialOffset = focusPointX - cardWidth / 2;
 
+            // Position all cards FIRST (while still hidden via CSS)
             cards.forEach((card, i) => {
-                // Start with card[1] at center, so card[0] peeks from left
-                // This means we subtract one step from the base position
                 const xPos = initialOffset + (i - 1) * step;
                 gsap.set(card, { x: xPos });
             });
 
             // Scale & opacity calculation based on distance from center
-            const updateScales = () => {
+            const updateScales = (revealCards = false) => {
                 const containerRect = sliderContainer.getBoundingClientRect();
                 const focusPoint = containerRect.left + focusPointX;
 
@@ -132,19 +131,25 @@ export default function Hero() {
 
                     // Scale: 0.8 base + up to 0.2 bonus at center = 1.0 max
                     const scale = 0.8 + (0.2 * normDist);
-                    // Opacity: subtle fade for distant cards
-                    const opacity = 1; // could do 0.6 + (0.4 * normDist)
 
-                    gsap.set(card, {
-                        scale: scale,
-                        opacity: opacity,
-                        zIndex: Math.round(normDist * 100)
-                    });
+                    // Use autoAlpha for initial reveal (handles visibility + opacity)
+                    if (revealCards) {
+                        gsap.set(card, {
+                            scale: scale,
+                            autoAlpha: 1, // Sets visibility: visible AND opacity: 1
+                            zIndex: Math.round(normDist * 100)
+                        });
+                    } else {
+                        gsap.set(card, {
+                            scale: scale,
+                            zIndex: Math.round(normDist * 100)
+                        });
+                    }
                 });
             };
 
-            // Initial scale setup
-            updateScales();
+            // Initial scale setup AND reveal cards (no flicker since positions are set)
+            updateScales(true);
 
             // Wrap utility: instantly reposition cards that go off-screen
             const wrapCards = () => {
@@ -188,7 +193,7 @@ export default function Hero() {
             gsap.delayedCall(1.2, animateNextStep);
 
             // Ticker for smooth scale updates during animation
-            const tickerFunc = () => updateScales();
+            const tickerFunc = () => updateScales(false);
             gsap.ticker.add(tickerFunc);
 
             // Cleanup
@@ -257,6 +262,7 @@ export default function Hero() {
                                         fill
                                         className="object-contain"
                                         sizes="(max-width: 768px) 300px, 450px"
+                                        priority={index < 3} // Preload first 3 images
                                     />
                                 </div>
                             </div>
