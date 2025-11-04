@@ -16,10 +16,10 @@ const MARQUEE_ITEMS = [
 ];
 
 const CARDS = [
-    { id: 1, src: "/images/img-0.png", alt: "Spaw Retreat" },
-    { id: 2, src: "/images/img-1.png", alt: "Sunnyside Up" },
-    { id: 3, src: "/images/img-2.png", alt: "Bott and Sons" },
-    { id: 4, src: "/images/img-3.png", alt: "Another Client" },
+    { id: 1, src: "/images/img-0.png", alt: "Sarah Foxx, CEO" },
+    { id: 2, src: "/images/img-1.png", alt: "Jeffrey R. Bott, Leading Partner" },
+    { id: 3, src: "/images/img-2.png", alt: "Julianna Alvarez, Founder" },
+    { id: 4, src: "/images/img-3.png", alt: "Oscar Wilder, CEO Engineer" },
 ];
 
 export default function Hero() {
@@ -102,14 +102,24 @@ export default function Hero() {
             const containerWidth = sliderContainer.offsetWidth;
             const focusPointX = containerWidth / 2;
 
-            // Initial positioning: center the first card, others follow to the right
-            // We offset by half a card width so the card CENTER aligns with focusPointX
-            // Also shift one card left so there's a visible card on the left side initially
+            // Initial positioning: arrange cards in a CIRCULAR layout around center
+            // This ensures there's always a card ready on both sides for seamless looping
             const initialOffset = focusPointX - cardWidth / 2;
 
             // Position all cards FIRST (while still hidden via CSS)
             cards.forEach((card, i) => {
-                const xPos = initialOffset + (i - 1) * step;
+                // Calculate position relative to center (card[1] at center means i-1)
+                let relativePos = i - 1;
+
+                // Wrap cards that would be too far right to the left side
+                // This creates a circular arrangement: with 4 cards at positions -2, -1, 0, +1
+                // instead of -1, 0, +1, +2 (which leaves the far left empty initially)
+                const halfCards = Math.floor(totalCards / 2);
+                if (relativePos >= halfCards) {
+                    relativePos -= totalCards;
+                }
+
+                const xPos = initialOffset + relativePos * step;
                 gsap.set(card, { x: xPos });
             });
 
