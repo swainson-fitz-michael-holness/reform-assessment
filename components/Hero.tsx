@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef } from "react";
+import React, { useRef, useCallback } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { CustomEase } from "gsap/CustomEase";
@@ -22,6 +22,119 @@ const CARDS = [
     { id: 4, src: "/images/img-3.png", alt: "Oscar Wilder, CEO Engineer" },
 ];
 
+// ===========================================
+// RESPONSIVE SCALING UTILITIES
+// ===========================================
+
+// Design tokens at 1440px base
+const DESIGN_TOKENS = {
+    // Marquee dimensions
+    marqueeWidth: 662,
+    marqueeExpandedWidth: 670,
+    marqueeHeight: 79,
+
+    // Card slider dimensions
+    cardWidth: 493,
+    cardHeight: 244,
+    cardGap: 0,
+
+    // Breakpoints
+    desktop: 1440,
+    tablet: 1024,
+    mobile: 768,
+
+    // Tablet/mobile overrides
+    tablet_cardWidth: 350,
+    tablet_cardHeight: 190,
+    mobile_cardWidth: 280,
+    mobile_cardHeight: 156,
+    tablet_marqueeWidth: 400,
+    mobile_marqueeWidth: 280,
+} as const;
+
+/**
+ * Calculates a responsive value based on viewport width
+ * - >= 1440px: returns the exact design value
+ * - 1024-1439px: scales proportionally (value / 1440 * viewportWidth)
+ * - < 1024px: returns tablet/mobile specific value if provided
+ */
+function getResponsiveValue(
+    designValue: number,
+    viewportWidth: number,
+    tabletValue?: number,
+    mobileValue?: number
+): number {
+    if (viewportWidth >= DESIGN_TOKENS.desktop) {
+        return designValue;
+    }
+
+    if (viewportWidth >= DESIGN_TOKENS.tablet) {
+        // Proportional scaling between 1024-1439px
+        return (designValue / DESIGN_TOKENS.desktop) * viewportWidth;
+    }
+
+    if (viewportWidth >= DESIGN_TOKENS.mobile && tabletValue !== undefined) {
+        return tabletValue;
+    }
+
+    if (mobileValue !== undefined) {
+        return mobileValue;
+    }
+
+    // Fallback: continue proportional scaling
+    return (designValue / DESIGN_TOKENS.desktop) * viewportWidth;
+}
+
+/**
+ * Returns all responsive dimensions needed for animations
+ */
+function getResponsiveDimensions(viewportWidth: number) {
+    return {
+        // Marquee
+        marqueeWidth: getResponsiveValue(
+            DESIGN_TOKENS.marqueeWidth,
+            viewportWidth,
+            DESIGN_TOKENS.tablet_marqueeWidth,
+            DESIGN_TOKENS.mobile_marqueeWidth
+        ),
+        marqueeExpandedWidth: getResponsiveValue(
+            DESIGN_TOKENS.marqueeExpandedWidth,
+            viewportWidth,
+            DESIGN_TOKENS.tablet_marqueeWidth + 10,
+            DESIGN_TOKENS.mobile_marqueeWidth + 10
+        ),
+        marqueeHeight: getResponsiveValue(
+            DESIGN_TOKENS.marqueeHeight,
+            viewportWidth,
+            60,
+            50
+        ),
+
+        // Cards
+        cardWidth: getResponsiveValue(
+            DESIGN_TOKENS.cardWidth,
+            viewportWidth,
+            DESIGN_TOKENS.tablet_cardWidth,
+            DESIGN_TOKENS.mobile_cardWidth
+        ),
+        cardHeight: getResponsiveValue(
+            DESIGN_TOKENS.cardHeight,
+            viewportWidth,
+            DESIGN_TOKENS.tablet_cardHeight,
+            DESIGN_TOKENS.mobile_cardHeight
+        ),
+        cardGap: DESIGN_TOKENS.cardGap,
+
+        // Computed
+        get step() {
+            return this.cardWidth + this.cardGap;
+        },
+        get totalWidth() {
+            return CARDS.length * this.step;
+        },
+    };
+}
+
 export default function Hero() {
     const containerRef = useRef<HTMLElement>(null);
     const marqueeWrapperRef = useRef<HTMLDivElement>(null);
@@ -36,7 +149,24 @@ export default function Hero() {
     const textRef2 = useRef<HTMLSpanElement>(null);
     const textRef3 = useRef<HTMLSpanElement>(null);
 
+    // Store animation state for cleanup
+    const animationStateRef = useRef<{
+        isAnimating: boolean;
+        tickerFunc: (() => void) | null;
+    }>({
+        isAnimating: true,
+        tickerFunc: null,
+    });
+
+    // Get current dimensions (memoized callback)
+    const getDimensions = useCallback(() => {
+        const viewportWidth = typeof window !== "undefined" ? window.innerWidth : DESIGN_TOKENS.desktop;
+        return getResponsiveDimensions(viewportWidth);
+    }, []);
+
     useGSAP(() => {
+        const dims = getDimensions();
+
         // 1. Marquee Infinite Scroll
         if (marqueeTrackRef.current) {
             const w = marqueeTrackRef.current.scrollWidth / 2;
@@ -51,8 +181,9 @@ export default function Hero() {
         // 2. MAIN ANIMATION SEQUENCE (Marquee collapse)
         const tl = gsap.timeline({ delay: 3 });
 
+        // Use responsive marquee width
         tl.to(marqueeWrapperRef.current, {
-            width: "670px",
+            width: dims.marqueeExpandedWidth,
             duration: 0.7,
             ease: "sine.in",
         });
@@ -92,18 +223,18 @@ export default function Hero() {
         const cards = cardsRef.current.filter(Boolean) as HTMLDivElement[];
 
         if (sliderContainer && cards.length > 0) {
-            const cardWidth = 493;
-            const gap = 0;
-            const step = cardWidth + gap;
+            // Use responsive dimensions
+            const cardWidth = dims.cardWidth;
+            const gap = dims.cardGap;
+            const step = dims.step;
             const totalCards = cards.length;
-            const totalWidth = totalCards * step;
+            const totalWidth = dims.totalWidth;
 
             // The "focus point" - CENTER of the slider
             const containerWidth = sliderContainer.offsetWidth;
             const focusPointX = containerWidth / 2;
 
             // Initial positioning: arrange cards in a CIRCULAR layout around center
-            // This ensures there's always a card ready on both sides for seamless looping
             const initialOffset = focusPointX - cardWidth / 2;
 
             // Position all cards FIRST (while still hidden via CSS)
@@ -112,8 +243,6 @@ export default function Hero() {
                 let relativePos = i - 1;
 
                 // Wrap cards that would be too far right to the left side
-                // This creates a circular arrangement: with 4 cards at positions -2, -1, 0, +1
-                // instead of -1, 0, +1, +2 (which leaves the far left empty initially)
                 const halfCards = Math.floor(totalCards / 2);
                 if (relativePos >= halfCards) {
                     relativePos -= totalCards;
@@ -128,13 +257,16 @@ export default function Hero() {
                 const containerRect = sliderContainer.getBoundingClientRect();
                 const focusPoint = containerRect.left + focusPointX;
 
+                // Scale maxDist proportionally too
+                const currentDims = getDimensions();
+                const maxDist = getResponsiveValue(500, window.innerWidth, 400, 300);
+
                 cards.forEach((card) => {
                     if (!card) return;
                     const rect = card.getBoundingClientRect();
                     const cardCenter = rect.left + rect.width / 2;
 
                     const dist = Math.abs(focusPoint - cardCenter);
-                    const maxDist = 500;
 
                     // Normalize: 1 at center, 0 at maxDist
                     const normDist = Math.max(0, 1 - dist / maxDist);
@@ -142,11 +274,10 @@ export default function Hero() {
                     // Scale: 0.8 base + up to 0.2 bonus at center = 1.0 max
                     const scale = 0.8 + (0.2 * normDist);
 
-                    // Use autoAlpha for initial reveal (handles visibility + opacity)
                     if (revealCards) {
                         gsap.set(card, {
                             scale: scale,
-                            autoAlpha: 1, // Sets visibility: visible AND opacity: 1
+                            autoAlpha: 1,
                             zIndex: Math.round(normDist * 100)
                         });
                     } else {
@@ -158,34 +289,45 @@ export default function Hero() {
                 });
             };
 
-            // Initial scale setup AND reveal cards (no flicker since positions are set)
+            // Initial scale setup AND reveal cards
             updateScales(true);
 
             // Wrap utility: instantly reposition cards that go off-screen
             const wrapCards = () => {
+                // Get current dimensions (in case of resize)
+                const currentDims = getDimensions();
+                const currentStep = currentDims.step;
+                const currentTotalWidth = currentDims.totalWidth;
+                const currentCardWidth = currentDims.cardWidth;
+                const currentGap = currentDims.cardGap;
+
                 cards.forEach((card) => {
                     const currentX = gsap.getProperty(card, "x") as number;
 
                     // If card moved too far right (off right edge), wrap to left end
                     if (currentX > containerWidth) {
-                        gsap.set(card, { x: currentX - totalWidth });
+                        gsap.set(card, { x: currentX - currentTotalWidth });
                     }
                     // If card moved too far left (off left edge), wrap to right end
-                    else if (currentX < -cardWidth - gap) {
-                        gsap.set(card, { x: currentX + totalWidth });
+                    else if (currentX < -currentCardWidth - currentGap) {
+                        gsap.set(card, { x: currentX + currentTotalWidth });
                     }
                 });
             };
 
             // Recursive step animation for true infinite loop
-            let isAnimating = true;
+            animationStateRef.current.isAnimating = true;
 
             const animateNextStep = () => {
-                if (!isAnimating) return;
+                if (!animationStateRef.current.isAnimating) return;
 
-                // Animate all cards RIGHT by one step (reversed direction)
+                // Get current step size (responsive)
+                const currentDims = getDimensions();
+                const currentStep = currentDims.step;
+
+                // Animate all cards RIGHT by one step
                 gsap.to(cards, {
-                    x: `+=${step}`,
+                    x: `+=${currentStep}`,
                     duration: 1.4,
                     ease: "power4.inOut",
                     stagger: 0,
@@ -193,7 +335,7 @@ export default function Hero() {
                         // Wrap cards that went off-screen
                         wrapCards();
 
-                        // Pause at this position (800ms focus time)
+                        // Pause at this position
                         gsap.delayedCall(5.0, animateNextStep);
                     }
                 });
@@ -205,11 +347,66 @@ export default function Hero() {
             // Ticker for smooth scale updates during animation
             const tickerFunc = () => updateScales(false);
             gsap.ticker.add(tickerFunc);
+            animationStateRef.current.tickerFunc = tickerFunc;
+
+            // Handle resize: reposition cards to maintain layout
+            const handleResize = () => {
+                const newDims = getDimensions();
+                const newCardWidth = newDims.cardWidth;
+                const newStep = newDims.step;
+                const newTotalWidth = newDims.totalWidth;
+
+                const newContainerWidth = sliderContainer.offsetWidth;
+                const newFocusPointX = newContainerWidth / 2;
+                const newInitialOffset = newFocusPointX - newCardWidth / 2;
+
+                // Recalculate positions based on current card order
+                // Find which card is closest to center
+                const containerRect = sliderContainer.getBoundingClientRect();
+                const centerX = containerRect.left + newFocusPointX;
+
+                let closestCardIndex = 0;
+                let closestDistance = Infinity;
+
+                cards.forEach((card, i) => {
+                    const rect = card.getBoundingClientRect();
+                    const cardCenter = rect.left + rect.width / 2;
+                    const dist = Math.abs(centerX - cardCenter);
+                    if (dist < closestDistance) {
+                        closestDistance = dist;
+                        closestCardIndex = i;
+                    }
+                });
+
+                // Reposition all cards relative to the closest one
+                cards.forEach((card, i) => {
+                    let relativePos = i - closestCardIndex;
+
+                    // Wrap to maintain circular layout
+                    const halfCards = Math.floor(totalCards / 2);
+                    if (relativePos > halfCards) {
+                        relativePos -= totalCards;
+                    } else if (relativePos < -halfCards) {
+                        relativePos += totalCards;
+                    }
+
+                    const xPos = newInitialOffset + relativePos * newStep;
+                    gsap.set(card, { x: xPos });
+                });
+
+                // Update scales after repositioning
+                updateScales(false);
+            };
+
+            window.addEventListener("resize", handleResize);
 
             // Cleanup
             return () => {
-                isAnimating = false;
-                gsap.ticker.remove(tickerFunc);
+                animationStateRef.current.isAnimating = false;
+                if (animationStateRef.current.tickerFunc) {
+                    gsap.ticker.remove(animationStateRef.current.tickerFunc);
+                }
+                window.removeEventListener("resize", handleResize);
                 gsap.killTweensOf(cards);
             };
         }
@@ -272,7 +469,7 @@ export default function Hero() {
                                         fill
                                         className="object-contain"
                                         sizes="(max-width: 768px) 300px, 450px"
-                                        priority={index < 3} // Preload first 3 images
+                                        priority={index < 3}
                                     />
                                 </div>
                             </div>
