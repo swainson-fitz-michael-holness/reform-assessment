@@ -19,6 +19,17 @@
   padding-top: 10vh;
   padding-bottom: 5rem;
   overflow: hidden;
+
+  /* Gutter for viewports < 1440px */
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 1440px) {
+  .hero-section {
+    padding-left: 0;
+    padding-right: 0;
+  }
 }
 
 .hero-container {
@@ -201,9 +212,9 @@
 @media (min-width: 1024px) and (max-width: 1439px) {
   .hero-container {
     max-width: 100%;
-    /* 64px padding at 1440 = 4.444vw */
-    padding-left: calc(64 / 1440 * 100vw);
-    padding-right: calc(64 / 1440 * 100vw);
+    /* 64px padding at 1440, with 16px minimum gutter */
+    padding-left: max(1rem, calc(64 / 1440 * 100vw));
+    padding-right: max(1rem, calc(64 / 1440 * 100vw));
   }
 
   .hero-title {
