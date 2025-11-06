@@ -178,16 +178,31 @@
 /* ================================================== */
 /* TABLET BREAKPOINT: 768px - 1023px                  */
 /* ================================================== */
-@media (min-width: 768px) and (max-width: 1023px) {
+@media (min-width: 501px) and (max-width: 1024px) {
   .hero-title {
-    font-size: 8vw;
+    /* Calculate for 112px: px / viewport total width * 100 */
+    font-size: 10.938vw;
+    padding: 0 1rem;
+  }
+
+  .hero-content-wrapper {
+    grid-template-columns: 42% 58%;
+    height: 58.594vw; 
+    margin-top: 8rem;
+  }
+
+  .hero-text-side {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-right: 1px solid #e5e5e5;
   }
 
   .marquee-wrapper {
-    width: 400px;
-    height: 60px;
+    width: 307px;
+    height: 79px;
     font-size: 11px;
-    border-radius: 10px;
+    border-radius: 12px;
   }
 
   .hero-description {
@@ -209,7 +224,7 @@
 /* Everything scales relative to 1440px base          */
 /* Formula: value / 1440 * 100vw                      */
 /* ================================================== */
-@media (min-width: 1024px) and (max-width: 1439px) {
+@media (min-width: 1025px) and (max-width: 1439px) {
   .hero-container {
     max-width: 100%;
     /* 64px padding at 1440, with 16px minimum gutter */
