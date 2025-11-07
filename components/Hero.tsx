@@ -26,112 +26,126 @@ const CARDS = [
 // RESPONSIVE SCALING UTILITIES
 // ===========================================
 
-// Design tokens at 1440px base
+// Design tokens at base breakpoints
 const DESIGN_TOKENS = {
-    // Marquee dimensions
-    marqueeWidth: 662,
-    marqueeExpandedWidth: 670,
-    marqueeHeight: 79,
-
-    // Card slider dimensions
-    cardWidth: 493,
-    cardHeight: 244,
-    cardGap: 0,
-
     // Breakpoints
     desktop: 1440,
-    tablet: 1024,
-    mobile: 768,
+    tabletMax: 1024,
+    tabletMin: 501,
+    mobile: 500,
 
-    // Tablet/mobile overrides
-    tablet_cardWidth: 350,
-    tablet_cardHeight: 190,
+    // Desktop base (1440px) - Horizontal slider
+    desktop_marqueeWidth: 662,
+    desktop_marqueeExpandedWidth: 670,
+    desktop_marqueeHeight: 79,
+    desktop_cardWidth: 493,
+    desktop_cardHeight: 244,
+    desktop_cardGap: 0,  // 16px gap at 1440
+    desktop_maxScaleDist: 500,
+
+    // Tablet base (1024px) - Vertical slider
+    tablet_marqueeWidth: 307,
+    tablet_marqueeExpandedWidth: 315,
+    tablet_marqueeHeight: 79,
+    tablet_cardWidth: 493,
+    tablet_cardHeight: 244,
+    tablet_cardGap: 32,  // 16px gap at 1024
+    tablet_maxScaleDist: 300,
+    tablet_descriptionFontSize: 24,
+
+    // Mobile base (500px)
+    mobile_marqueeWidth: 280,
+    mobile_marqueeHeight: 50,
     mobile_cardWidth: 280,
     mobile_cardHeight: 156,
-    tablet_marqueeWidth: 400,
-    mobile_marqueeWidth: 280,
 } as const;
 
+type LayoutMode = 'desktop' | 'tablet' | 'mobile';
+
 /**
- * Calculates a responsive value based on viewport width
- * - >= 1440px: returns the exact design value
- * - 1024-1439px: scales proportionally (value / 1440 * viewportWidth)
- * - < 1024px: returns tablet/mobile specific value if provided
+ * Determines the current layout mode based on viewport width
  */
-function getResponsiveValue(
-    designValue: number,
-    viewportWidth: number,
-    tabletValue?: number,
-    mobileValue?: number
-): number {
-    if (viewportWidth >= DESIGN_TOKENS.desktop) {
-        return designValue;
-    }
-
-    if (viewportWidth >= DESIGN_TOKENS.tablet) {
-        // Proportional scaling between 1024-1439px
-        return (designValue / DESIGN_TOKENS.desktop) * viewportWidth;
-    }
-
-    if (viewportWidth >= DESIGN_TOKENS.mobile && tabletValue !== undefined) {
-        return tabletValue;
-    }
-
-    if (mobileValue !== undefined) {
-        return mobileValue;
-    }
-
-    // Fallback: continue proportional scaling
-    return (designValue / DESIGN_TOKENS.desktop) * viewportWidth;
+function getLayoutMode(viewportWidth: number): LayoutMode {
+    if (viewportWidth > DESIGN_TOKENS.tabletMax) return 'desktop';
+    if (viewportWidth >= DESIGN_TOKENS.tabletMin) return 'tablet';
+    return 'mobile';
 }
 
 /**
- * Returns all responsive dimensions needed for animations
+ * Calculates a responsive value with proportional scaling
+ */
+function scaleValue(designValue: number, baseWidth: number, viewportWidth: number): number {
+    return (designValue / baseWidth) * viewportWidth;
+}
+
+/**
+ * Returns all responsive dimensions needed for animations based on current viewport
  */
 function getResponsiveDimensions(viewportWidth: number) {
+    const mode = getLayoutMode(viewportWidth);
+
+    if (mode === 'desktop') {
+        const isFixed = viewportWidth >= DESIGN_TOKENS.desktop;
+        const baseWidth = DESIGN_TOKENS.desktop;
+
+        return {
+            mode: 'desktop' as const,
+            marqueeWidth: isFixed
+                ? DESIGN_TOKENS.desktop_marqueeWidth
+                : scaleValue(DESIGN_TOKENS.desktop_marqueeWidth, baseWidth, viewportWidth),
+            marqueeExpandedWidth: isFixed
+                ? DESIGN_TOKENS.desktop_marqueeExpandedWidth
+                : scaleValue(DESIGN_TOKENS.desktop_marqueeExpandedWidth, baseWidth, viewportWidth),
+            marqueeHeight: isFixed
+                ? DESIGN_TOKENS.desktop_marqueeHeight
+                : scaleValue(DESIGN_TOKENS.desktop_marqueeHeight, baseWidth, viewportWidth),
+            cardWidth: isFixed
+                ? DESIGN_TOKENS.desktop_cardWidth
+                : scaleValue(DESIGN_TOKENS.desktop_cardWidth, baseWidth, viewportWidth),
+            cardHeight: isFixed
+                ? DESIGN_TOKENS.desktop_cardHeight
+                : scaleValue(DESIGN_TOKENS.desktop_cardHeight, baseWidth, viewportWidth),
+            cardGap: isFixed
+                ? DESIGN_TOKENS.desktop_cardGap
+                : scaleValue(DESIGN_TOKENS.desktop_cardGap, baseWidth, viewportWidth),
+            maxScaleDist: isFixed
+                ? DESIGN_TOKENS.desktop_maxScaleDist
+                : scaleValue(DESIGN_TOKENS.desktop_maxScaleDist, baseWidth, viewportWidth),
+            get step() { return this.cardWidth + this.cardGap; },
+            get totalWidth() { return CARDS.length * this.step; },
+        };
+    }
+
+    if (mode === 'tablet') {
+        const baseWidth = DESIGN_TOKENS.tabletMax;
+
+        return {
+            mode: 'tablet' as const,
+            marqueeWidth: scaleValue(DESIGN_TOKENS.tablet_marqueeWidth, baseWidth, viewportWidth),
+            marqueeExpandedWidth: scaleValue(DESIGN_TOKENS.tablet_marqueeExpandedWidth, baseWidth, viewportWidth),
+            marqueeHeight: scaleValue(DESIGN_TOKENS.tablet_marqueeHeight, baseWidth, viewportWidth),
+            cardWidth: scaleValue(DESIGN_TOKENS.tablet_cardWidth, baseWidth, viewportWidth),
+            cardHeight: scaleValue(DESIGN_TOKENS.tablet_cardHeight, baseWidth, viewportWidth),
+            cardGap: scaleValue(DESIGN_TOKENS.tablet_cardGap, baseWidth, viewportWidth),
+            maxScaleDist: scaleValue(DESIGN_TOKENS.tablet_maxScaleDist, baseWidth, viewportWidth),
+            descriptionFontSize: scaleValue(DESIGN_TOKENS.tablet_descriptionFontSize, baseWidth, viewportWidth),
+            get step() { return this.cardHeight + this.cardGap; },
+            get totalHeight() { return CARDS.length * this.step; },
+        };
+    }
+
+    // Mobile fallback
     return {
-        // Marquee
-        marqueeWidth: getResponsiveValue(
-            DESIGN_TOKENS.marqueeWidth,
-            viewportWidth,
-            DESIGN_TOKENS.tablet_marqueeWidth,
-            DESIGN_TOKENS.mobile_marqueeWidth
-        ),
-        marqueeExpandedWidth: getResponsiveValue(
-            DESIGN_TOKENS.marqueeExpandedWidth,
-            viewportWidth,
-            DESIGN_TOKENS.tablet_marqueeWidth + 10,
-            DESIGN_TOKENS.mobile_marqueeWidth + 10
-        ),
-        marqueeHeight: getResponsiveValue(
-            DESIGN_TOKENS.marqueeHeight,
-            viewportWidth,
-            60,
-            50
-        ),
-
-        // Cards
-        cardWidth: getResponsiveValue(
-            DESIGN_TOKENS.cardWidth,
-            viewportWidth,
-            DESIGN_TOKENS.tablet_cardWidth,
-            DESIGN_TOKENS.mobile_cardWidth
-        ),
-        cardHeight: getResponsiveValue(
-            DESIGN_TOKENS.cardHeight,
-            viewportWidth,
-            DESIGN_TOKENS.tablet_cardHeight,
-            DESIGN_TOKENS.mobile_cardHeight
-        ),
-        cardGap: DESIGN_TOKENS.cardGap,
-
-        // Computed
-        get step() {
-            return this.cardWidth + this.cardGap;
-        },
-        get totalWidth() {
-            return CARDS.length * this.step;
-        },
+        mode: 'mobile' as const,
+        marqueeWidth: DESIGN_TOKENS.mobile_marqueeWidth,
+        marqueeExpandedWidth: DESIGN_TOKENS.mobile_marqueeWidth + 10,
+        marqueeHeight: DESIGN_TOKENS.mobile_marqueeHeight,
+        cardWidth: DESIGN_TOKENS.mobile_cardWidth,
+        cardHeight: DESIGN_TOKENS.mobile_cardHeight,
+        cardGap: 8,
+        maxScaleDist: 200,
+        get step() { return this.cardHeight + this.cardGap; },
+        get totalHeight() { return CARDS.length * this.step; },
     };
 }
 
@@ -153,19 +167,434 @@ export default function Hero() {
     const animationStateRef = useRef<{
         isAnimating: boolean;
         tickerFunc: (() => void) | null;
+        currentMode: LayoutMode | null;
+        cleanup: (() => void) | null;
+        // Store current animation parameters for consistent wrapping
+        animParams: {
+            step: number;
+            totalSpan: number;
+            cardSize: number;
+            gap: number;
+        } | null;
     }>({
         isAnimating: true,
         tickerFunc: null,
+        currentMode: null,
+        cleanup: null,
+        animParams: null,
     });
 
-    // Get current dimensions (memoized callback)
+    // Get current dimensions
     const getDimensions = useCallback(() => {
         const viewportWidth = typeof window !== "undefined" ? window.innerWidth : DESIGN_TOKENS.desktop;
         return getResponsiveDimensions(viewportWidth);
     }, []);
 
+    // ===========================================
+    // HORIZONTAL SLIDER (Desktop: > 1024px)
+    // ===========================================
+    const initHorizontalSlider = useCallback((
+        sliderContainer: HTMLDivElement,
+        cards: HTMLDivElement[],
+        dims: ReturnType<typeof getResponsiveDimensions>
+    ) => {
+        const cardWidth = dims.cardWidth;
+        const gap = dims.cardGap;
+        const step = cardWidth + gap;
+        const totalCards = cards.length;
+        const totalWidth = totalCards * step;
+
+        // Store animation parameters for consistent wrapping
+        animationStateRef.current.animParams = {
+            step,
+            totalSpan: totalWidth,
+            cardSize: cardWidth,
+            gap
+        };
+
+        // The "focus point" - CENTER of the slider
+        const containerWidth = sliderContainer.offsetWidth;
+        const focusPointX = containerWidth / 2;
+        const initialOffset = focusPointX - cardWidth / 2;
+
+        // Position all cards in circular layout with EXPLICIT vertical centering
+        cards.forEach((card, i) => {
+            let relativePos = i - 1;
+            const halfCards = Math.floor(totalCards / 2);
+            if (relativePos >= halfCards) {
+                relativePos -= totalCards;
+            }
+            const xPos = initialOffset + relativePos * step;
+            
+            // Clear any previous GSAP transforms first
+            gsap.set(card, { clearProps: "x,y,xPercent,yPercent,top,left,scale,transform" });
+            
+            // Set position with explicit vertical centering
+            // Using transform for both x position and vertical centering
+            gsap.set(card, { 
+                x: xPos,
+                top: '50%',
+                yPercent: -50,  // Centers vertically: translateY(-50%)
+                left: 0,
+                visibility: 'visible'
+            });
+        });
+
+        // Scale & opacity calculation based on horizontal distance from center
+        const updateScales = (revealCards = false) => {
+            const containerRect = sliderContainer.getBoundingClientRect();
+            const currentContainerWidth = sliderContainer.offsetWidth;
+            const currentFocusPoint = containerRect.left + currentContainerWidth / 2;
+            const currentDims = getDimensions();
+            const maxDist = currentDims.maxScaleDist;
+
+            cards.forEach((card) => {
+                if (!card) return;
+                const rect = card.getBoundingClientRect();
+                const cardCenter = rect.left + rect.width / 2;
+                const dist = Math.abs(currentFocusPoint - cardCenter);
+                const normDist = Math.max(0, 1 - dist / maxDist);
+                const scale = 0.8 + (0.2 * normDist);
+
+                if (revealCards) {
+                    gsap.set(card, { scale, autoAlpha: 1, zIndex: Math.round(normDist * 100) });
+                } else {
+                    gsap.set(card, { scale, zIndex: Math.round(normDist * 100) });
+                }
+            });
+        };
+
+        // Initial reveal
+        updateScales(true);
+
+        // Wrap utility for horizontal - uses stored animation params for consistency
+        const wrapCards = () => {
+            const params = animationStateRef.current.animParams;
+            if (!params) return;
+            
+            const currentContainerWidth = sliderContainer.offsetWidth;
+
+            cards.forEach((card) => {
+                const currentX = gsap.getProperty(card, "x") as number;
+                
+                // Wrap right: if card's left edge is past right edge of container + buffer
+                if (currentX > currentContainerWidth + params.gap) {
+                    gsap.set(card, { x: currentX - params.totalSpan });
+                } 
+                // Wrap left: if card's right edge is past left edge of container
+                else if (currentX < -(params.cardSize + params.gap)) {
+                    gsap.set(card, { x: currentX + params.totalSpan });
+                }
+            });
+        };
+
+        // Animation loop - moves RIGHT
+        const animateNextStep = () => {
+            if (!animationStateRef.current.isAnimating) return;
+            if (animationStateRef.current.currentMode !== 'desktop') return;
+
+            // Get fresh dimensions for the animation step
+            const currentDims = getDimensions();
+            const currentStep = currentDims.cardWidth + currentDims.cardGap;
+            
+            // Update stored params before animation
+            animationStateRef.current.animParams = {
+                step: currentStep,
+                totalSpan: currentStep * totalCards,
+                cardSize: currentDims.cardWidth,
+                gap: currentDims.cardGap
+            };
+
+            gsap.to(cards, {
+                x: `+=${currentStep}`,
+                duration: 1.4,
+                ease: "power4.inOut",
+                onComplete: () => {
+                    wrapCards();
+                    gsap.delayedCall(5.0, animateNextStep);
+                }
+            });
+        };
+
+        // Ticker for smooth scale updates
+        const tickerFunc = () => updateScales(false);
+        gsap.ticker.add(tickerFunc);
+        animationStateRef.current.tickerFunc = tickerFunc;
+
+        // Start animation
+        gsap.delayedCall(1.2, animateNextStep);
+
+        // Resize handler for horizontal - smooth repositioning without hiding
+        const handleResize = () => {
+            const newMode = getLayoutMode(window.innerWidth);
+            if (newMode !== 'desktop') return;
+
+            const newDims = getDimensions();
+            const newCardWidth = newDims.cardWidth;
+            const newGap = newDims.cardGap;
+            const newStep = newCardWidth + newGap;
+            const newContainerWidth = sliderContainer.offsetWidth;
+            const newFocusPointX = newContainerWidth / 2;
+            const newInitialOffset = newFocusPointX - newCardWidth / 2;
+
+            // Update stored params
+            animationStateRef.current.animParams = {
+                step: newStep,
+                totalSpan: newStep * totalCards,
+                cardSize: newCardWidth,
+                gap: newGap
+            };
+
+            // Find closest card to center (maintains visual continuity)
+            const containerRect = sliderContainer.getBoundingClientRect();
+            const centerX = containerRect.left + newFocusPointX;
+            let closestCardIndex = 0;
+            let closestDistance = Infinity;
+
+            cards.forEach((card, i) => {
+                const rect = card.getBoundingClientRect();
+                const cardCenter = rect.left + rect.width / 2;
+                const dist = Math.abs(centerX - cardCenter);
+                if (dist < closestDistance) {
+                    closestDistance = dist;
+                    closestCardIndex = i;
+                }
+            });
+
+            // Reposition relative to closest - NO hiding, smooth transition
+            cards.forEach((card, i) => {
+                let relativePos = i - closestCardIndex;
+                const halfCards = Math.floor(totalCards / 2);
+                if (relativePos > halfCards) relativePos -= totalCards;
+                else if (relativePos < -halfCards) relativePos += totalCards;
+
+                const xPos = newInitialOffset + relativePos * newStep;
+                // Smooth reposition without hiding
+                gsap.set(card, { x: xPos });
+            });
+
+            updateScales(false);
+        };
+
+        window.addEventListener("resize", handleResize);
+
+        // Return cleanup function
+        return () => {
+            if (animationStateRef.current.tickerFunc) {
+                gsap.ticker.remove(animationStateRef.current.tickerFunc);
+            }
+            window.removeEventListener("resize", handleResize);
+            gsap.killTweensOf(cards);
+        };
+    }, [getDimensions]);
+
+    // ===========================================
+    // VERTICAL SLIDER (Tablet: 501-1024px)
+    // ===========================================
+    const initVerticalSlider = useCallback((
+        sliderContainer: HTMLDivElement,
+        cards: HTMLDivElement[],
+        dims: ReturnType<typeof getResponsiveDimensions>
+    ) => {
+        const cardHeight = dims.cardHeight;
+        const cardWidth = dims.cardWidth;
+        const gap = dims.cardGap;
+        const step = cardHeight + gap;
+        const totalCards = cards.length;
+        const totalHeight = totalCards * step;
+
+        // Store animation parameters for consistent wrapping
+        animationStateRef.current.animParams = {
+            step,
+            totalSpan: totalHeight,
+            cardSize: cardHeight,
+            gap
+        };
+
+        // The "focus point" - CENTER of the slider vertically
+        const containerHeight = sliderContainer.offsetHeight;
+        const containerWidth = sliderContainer.offsetWidth;
+        const focusPointY = containerHeight / 2;
+        const initialOffset = focusPointY - cardHeight / 2;
+
+        // Center cards horizontally
+        const centerX = (containerWidth - cardWidth) / 2;
+
+        // Position all cards
+        cards.forEach((card, i) => {
+            let relativePos = i - 1;
+            const halfCards = Math.floor(totalCards / 2);
+            if (relativePos >= halfCards) {
+                relativePos -= totalCards;
+            }
+            const yPos = initialOffset + relativePos * step;
+            
+            // Clear previous transforms and set fresh positions for vertical mode
+            gsap.set(card, { clearProps: "x,y,xPercent,yPercent,top,left,scale,transform" });
+            gsap.set(card, { 
+                x: centerX, 
+                y: yPos,
+                top: 0,      // Override CSS top: 50%
+                yPercent: 0, // No percentage offset for vertical
+                left: 0,
+                visibility: 'visible'
+            });
+        });
+
+        // Scale based on vertical distance from center
+        const updateScales = (revealCards = false) => {
+            const containerRect = sliderContainer.getBoundingClientRect();
+            const currentContainerHeight = sliderContainer.offsetHeight;
+            const currentFocusPoint = containerRect.top + currentContainerHeight / 2;
+            const currentDims = getDimensions();
+            const maxDist = currentDims.maxScaleDist;
+
+            cards.forEach((card) => {
+                if (!card) return;
+                const rect = card.getBoundingClientRect();
+                const cardCenter = rect.top + rect.height / 2;
+                const dist = Math.abs(currentFocusPoint - cardCenter);
+                const normDist = Math.max(0, 1 - dist / maxDist);
+                const scale = 0.8 + (0.2 * normDist);
+
+                if (revealCards) {
+                    gsap.set(card, { scale, autoAlpha: 1, zIndex: Math.round(normDist * 100) });
+                } else {
+                    gsap.set(card, { scale, zIndex: Math.round(normDist * 100) });
+                }
+            });
+        };
+
+        // Initial reveal
+        updateScales(true);
+
+        // Wrap utility for vertical - uses stored animation params for consistency
+        const wrapCards = () => {
+            const params = animationStateRef.current.animParams;
+            if (!params) return;
+            
+            const currentContainerHeight = sliderContainer.offsetHeight;
+
+            cards.forEach((card) => {
+                const currentY = gsap.getProperty(card, "y") as number;
+                
+                // Wrap top: if card's bottom edge is above top edge of container
+                if (currentY < -(params.cardSize + params.gap)) {
+                    gsap.set(card, { y: currentY + params.totalSpan });
+                }
+                // Wrap bottom: if card's top edge is below bottom edge of container + buffer
+                else if (currentY > currentContainerHeight + params.gap) {
+                    gsap.set(card, { y: currentY - params.totalSpan });
+                }
+            });
+        };
+
+        // Animation loop - moves UP (negative Y direction)
+        const animateNextStep = () => {
+            if (!animationStateRef.current.isAnimating) return;
+            if (animationStateRef.current.currentMode !== 'tablet') return;
+
+            // Get fresh dimensions for the animation step
+            const currentDims = getDimensions();
+            const currentStep = currentDims.cardHeight + currentDims.cardGap;
+            
+            // Update stored params before animation
+            animationStateRef.current.animParams = {
+                step: currentStep,
+                totalSpan: currentStep * totalCards,
+                cardSize: currentDims.cardHeight,
+                gap: currentDims.cardGap
+            };
+
+            gsap.to(cards, {
+                y: `-=${currentStep}`,
+                duration: 1.4,
+                ease: "power4.inOut",
+                onComplete: () => {
+                    wrapCards();
+                    gsap.delayedCall(5.0, animateNextStep);
+                }
+            });
+        };
+
+        // Ticker for smooth scale updates
+        const tickerFunc = () => updateScales(false);
+        gsap.ticker.add(tickerFunc);
+        animationStateRef.current.tickerFunc = tickerFunc;
+
+        // Start animation
+        gsap.delayedCall(1.2, animateNextStep);
+
+        // Resize handler for vertical - smooth repositioning without hiding
+        const handleResize = () => {
+            const newMode = getLayoutMode(window.innerWidth);
+            if (newMode !== 'tablet') return;
+
+            const newDims = getDimensions();
+            const newCardHeight = newDims.cardHeight;
+            const newCardWidth = newDims.cardWidth;
+            const newGap = newDims.cardGap;
+            const newStep = newCardHeight + newGap;
+            const newContainerHeight = sliderContainer.offsetHeight;
+            const newContainerWidth = sliderContainer.offsetWidth;
+            const newFocusPointY = newContainerHeight / 2;
+            const newInitialOffset = newFocusPointY - newCardHeight / 2;
+            const newCenterX = (newContainerWidth - newCardWidth) / 2;
+
+            // Update stored params
+            animationStateRef.current.animParams = {
+                step: newStep,
+                totalSpan: newStep * totalCards,
+                cardSize: newCardHeight,
+                gap: newGap
+            };
+
+            // Find closest card to center
+            const containerRect = sliderContainer.getBoundingClientRect();
+            const centerY = containerRect.top + newFocusPointY;
+            let closestCardIndex = 0;
+            let closestDistance = Infinity;
+
+            cards.forEach((card, i) => {
+                const rect = card.getBoundingClientRect();
+                const cardCenter = rect.top + rect.height / 2;
+                const dist = Math.abs(centerY - cardCenter);
+                if (dist < closestDistance) {
+                    closestDistance = dist;
+                    closestCardIndex = i;
+                }
+            });
+
+            // Reposition relative to closest - NO hiding, smooth transition
+            cards.forEach((card, i) => {
+                let relativePos = i - closestCardIndex;
+                const halfCards = Math.floor(totalCards / 2);
+                if (relativePos > halfCards) relativePos -= totalCards;
+                else if (relativePos < -halfCards) relativePos += totalCards;
+
+                const yPos = newInitialOffset + relativePos * newStep;
+                gsap.set(card, { x: newCenterX, y: yPos });
+            });
+
+            updateScales(false);
+        };
+
+        window.addEventListener("resize", handleResize);
+
+        // Return cleanup function
+        return () => {
+            if (animationStateRef.current.tickerFunc) {
+                gsap.ticker.remove(animationStateRef.current.tickerFunc);
+            }
+            window.removeEventListener("resize", handleResize);
+            gsap.killTweensOf(cards);
+        };
+    }, [getDimensions]);
+
     useGSAP(() => {
         const dims = getDimensions();
+        const currentMode = dims.mode;
+        animationStateRef.current.currentMode = currentMode;
 
         // 1. Marquee Infinite Scroll
         if (marqueeTrackRef.current) {
@@ -218,195 +647,66 @@ export default function Hero() {
             ease: "back.out(1.7)"
         }, ">-0.07");
 
-        // 3. ADVANCED CARD SLIDER - Stepped Infinite Loop
+        // 3. INITIALIZE APPROPRIATE SLIDER BASED ON MODE
         const sliderContainer = sliderContainerRef.current;
         const cards = cardsRef.current.filter(Boolean) as HTMLDivElement[];
 
         if (sliderContainer && cards.length > 0) {
-            // Use responsive dimensions
-            const cardWidth = dims.cardWidth;
-            const gap = dims.cardGap;
-            const step = dims.step;
-            const totalCards = cards.length;
-            const totalWidth = dims.totalWidth;
-
-            // The "focus point" - CENTER of the slider
-            const containerWidth = sliderContainer.offsetWidth;
-            const focusPointX = containerWidth / 2;
-
-            // Initial positioning: arrange cards in a CIRCULAR layout around center
-            const initialOffset = focusPointX - cardWidth / 2;
-
-            // Position all cards FIRST (while still hidden via CSS)
-            cards.forEach((card, i) => {
-                // Calculate position relative to center (card[1] at center means i-1)
-                let relativePos = i - 1;
-
-                // Wrap cards that would be too far right to the left side
-                const halfCards = Math.floor(totalCards / 2);
-                if (relativePos >= halfCards) {
-                    relativePos -= totalCards;
-                }
-
-                const xPos = initialOffset + relativePos * step;
-                gsap.set(card, { x: xPos });
-            });
-
-            // Scale & opacity calculation based on distance from center
-            const updateScales = (revealCards = false) => {
-                const containerRect = sliderContainer.getBoundingClientRect();
-                const focusPoint = containerRect.left + focusPointX;
-
-                // Scale maxDist proportionally too
-                const currentDims = getDimensions();
-                const maxDist = getResponsiveValue(500, window.innerWidth, 400, 300);
-
-                cards.forEach((card) => {
-                    if (!card) return;
-                    const rect = card.getBoundingClientRect();
-                    const cardCenter = rect.left + rect.width / 2;
-
-                    const dist = Math.abs(focusPoint - cardCenter);
-
-                    // Normalize: 1 at center, 0 at maxDist
-                    const normDist = Math.max(0, 1 - dist / maxDist);
-
-                    // Scale: 0.8 base + up to 0.2 bonus at center = 1.0 max
-                    const scale = 0.8 + (0.2 * normDist);
-
-                    if (revealCards) {
-                        gsap.set(card, {
-                            scale: scale,
-                            autoAlpha: 1,
-                            zIndex: Math.round(normDist * 100)
-                        });
-                    } else {
-                        gsap.set(card, {
-                            scale: scale,
-                            zIndex: Math.round(normDist * 100)
-                        });
-                    }
-                });
-            };
-
-            // Initial scale setup AND reveal cards
-            updateScales(true);
-
-            // Wrap utility: instantly reposition cards that go off-screen
-            const wrapCards = () => {
-                // Get current dimensions (in case of resize)
-                const currentDims = getDimensions();
-                const currentStep = currentDims.step;
-                const currentTotalWidth = currentDims.totalWidth;
-                const currentCardWidth = currentDims.cardWidth;
-                const currentGap = currentDims.cardGap;
-
-                cards.forEach((card) => {
-                    const currentX = gsap.getProperty(card, "x") as number;
-
-                    // If card moved too far right (off right edge), wrap to left end
-                    if (currentX > containerWidth) {
-                        gsap.set(card, { x: currentX - currentTotalWidth });
-                    }
-                    // If card moved too far left (off left edge), wrap to right end
-                    else if (currentX < -currentCardWidth - currentGap) {
-                        gsap.set(card, { x: currentX + currentTotalWidth });
-                    }
-                });
-            };
-
-            // Recursive step animation for true infinite loop
             animationStateRef.current.isAnimating = true;
 
-            const animateNextStep = () => {
-                if (!animationStateRef.current.isAnimating) return;
+            if (currentMode === 'desktop') {
+                animationStateRef.current.cleanup = initHorizontalSlider(sliderContainer, cards, dims);
+            } else if (currentMode === 'tablet') {
+                animationStateRef.current.cleanup = initVerticalSlider(sliderContainer, cards, dims);
+            }
 
-                // Get current step size (responsive)
-                const currentDims = getDimensions();
-                const currentStep = currentDims.step;
+            // Mode switch handler - smooth transition with minimal flicker
+            let resizeTimeout: NodeJS.Timeout | null = null;
+            
+            const handleModeSwitch = () => {
+                const newMode = getLayoutMode(window.innerWidth);
+                if (newMode !== animationStateRef.current.currentMode) {
+                    // Debounce to prevent rapid switches during resize
+                    if (resizeTimeout) clearTimeout(resizeTimeout);
+                    
+                    resizeTimeout = setTimeout(() => {
+                        // Cleanup current slider
+                        if (animationStateRef.current.cleanup) {
+                            animationStateRef.current.cleanup();
+                        }
+                        gsap.killTweensOf(cards);
 
-                // Animate all cards RIGHT by one step
-                gsap.to(cards, {
-                    x: `+=${currentStep}`,
-                    duration: 1.4,
-                    ease: "power4.inOut",
-                    stagger: 0,
-                    onComplete: () => {
-                        // Wrap cards that went off-screen
-                        wrapCards();
+                        // Quick fade out, reposition, fade in (minimal flicker)
+                        gsap.to(cards, {
+                            autoAlpha: 0,
+                            duration: 0.15,
+                            ease: "power2.out",
+                            onComplete: () => {
+                                // Initialize new slider (which will reveal cards)
+                                animationStateRef.current.currentMode = newMode;
+                                const newDims = getDimensions();
 
-                        // Pause at this position
-                        gsap.delayedCall(5.0, animateNextStep);
-                    }
-                });
+                                if (newMode === 'desktop') {
+                                    animationStateRef.current.cleanup = initHorizontalSlider(sliderContainer, cards, newDims);
+                                } else if (newMode === 'tablet') {
+                                    animationStateRef.current.cleanup = initVerticalSlider(sliderContainer, cards, newDims);
+                                }
+                            }
+                        });
+                    }, 50);
+                }
             };
 
-            // Start the animation loop after initial delay
-            gsap.delayedCall(1.2, animateNextStep);
-
-            // Ticker for smooth scale updates during animation
-            const tickerFunc = () => updateScales(false);
-            gsap.ticker.add(tickerFunc);
-            animationStateRef.current.tickerFunc = tickerFunc;
-
-            // Handle resize: reposition cards to maintain layout
-            const handleResize = () => {
-                const newDims = getDimensions();
-                const newCardWidth = newDims.cardWidth;
-                const newStep = newDims.step;
-                const newTotalWidth = newDims.totalWidth;
-
-                const newContainerWidth = sliderContainer.offsetWidth;
-                const newFocusPointX = newContainerWidth / 2;
-                const newInitialOffset = newFocusPointX - newCardWidth / 2;
-
-                // Recalculate positions based on current card order
-                // Find which card is closest to center
-                const containerRect = sliderContainer.getBoundingClientRect();
-                const centerX = containerRect.left + newFocusPointX;
-
-                let closestCardIndex = 0;
-                let closestDistance = Infinity;
-
-                cards.forEach((card, i) => {
-                    const rect = card.getBoundingClientRect();
-                    const cardCenter = rect.left + rect.width / 2;
-                    const dist = Math.abs(centerX - cardCenter);
-                    if (dist < closestDistance) {
-                        closestDistance = dist;
-                        closestCardIndex = i;
-                    }
-                });
-
-                // Reposition all cards relative to the closest one
-                cards.forEach((card, i) => {
-                    let relativePos = i - closestCardIndex;
-
-                    // Wrap to maintain circular layout
-                    const halfCards = Math.floor(totalCards / 2);
-                    if (relativePos > halfCards) {
-                        relativePos -= totalCards;
-                    } else if (relativePos < -halfCards) {
-                        relativePos += totalCards;
-                    }
-
-                    const xPos = newInitialOffset + relativePos * newStep;
-                    gsap.set(card, { x: xPos });
-                });
-
-                // Update scales after repositioning
-                updateScales(false);
-            };
-
-            window.addEventListener("resize", handleResize);
+            window.addEventListener("resize", handleModeSwitch);
 
             // Cleanup
             return () => {
                 animationStateRef.current.isAnimating = false;
-                if (animationStateRef.current.tickerFunc) {
-                    gsap.ticker.remove(animationStateRef.current.tickerFunc);
+                if (resizeTimeout) clearTimeout(resizeTimeout);
+                if (animationStateRef.current.cleanup) {
+                    animationStateRef.current.cleanup();
                 }
-                window.removeEventListener("resize", handleResize);
+                window.removeEventListener("resize", handleModeSwitch);
                 gsap.killTweensOf(cards);
             };
         }

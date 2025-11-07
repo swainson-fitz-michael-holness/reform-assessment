@@ -159,7 +159,7 @@
   position: absolute;
   top: 50%;
   left: 0;
-  transform: translateY(-50%);
+  /* Let GSAP handle all transforms - don't set transform here */
 
   width: 280px;
   height: 156px;
@@ -176,19 +176,26 @@
 }
 
 /* ================================================== */
-/* TABLET BREAKPOINT: 768px - 1023px                  */
+/* TABLET BREAKPOINT: 501px - 1024px                  */
+/* Proportional scaling based on 1024px               */
+/* Formula: value / 1024 * 100vw                      */
 /* ================================================== */
 @media (min-width: 501px) and (max-width: 1024px) {
   .hero-title {
-    /* Calculate for 112px: px / viewport total width * 100 */
-    font-size: 10.938vw;
+    /* 112px at 1024 = 10.9375vw */
+    font-size: calc(112 / 1024 * 100vw);
+    /* 96px line-height at 1024 */
+    line-height: calc(96 / 1024 * 100vw);
+    letter-spacing: -0.03em;
     padding: 0 1rem;
   }
 
   .hero-content-wrapper {
     grid-template-columns: 42% 58%;
-    height: 58.594vw; 
-    margin-top: 8rem;
+    /* 600px at 1024 = 58.59vw */
+    height: calc(600 / 1024 * 100vw);
+    /* 128px margin-top at 1024 */
+    margin-top: calc(128 / 1024 * 100vw);
   }
 
   .hero-text-side {
@@ -196,31 +203,59 @@
     flex-direction: column;
     justify-content: space-between;
     border-right: 1px solid #e5e5e5;
+    /* 24px padding at 1024 */
+    padding: calc(24 / 1024 * 100vw);
   }
 
   .marquee-wrapper {
-    width: 307px;
-    height: 79px;
-    font-size: 11px;
-    border-radius: 12px;
+    /* 307px at 1024 = 29.98vw */
+    width: calc(307 / 1024 * 100vw);
+    /* 79px at 1024 = 7.71vw */
+    height: calc(79 / 1024 * 100vw);
+    /* 11px font-size at 1024 */
+    font-size: calc(11 / 1024 * 100vw);
+    /* 12px border-radius at 1024 */
+    border-radius: calc(12 / 1024 * 100vw);
   }
 
   .hero-description {
-    font-size: 1.25rem;
+    /* 24px at 1024 = 2.34vw */
+    font-size: calc(24 / 1024 * 100vw);
+    /* 33.6px line-height at 1024 */
+    line-height: calc(33.6 / 1024 * 100vw);
+    letter-spacing: -0.02em;
+    /* 32px margin-bottom at 1024 */
+    margin-bottom: calc(32 / 1024 * 100vw);
   }
 
   .slider-card {
-    width: 350px;
-    height: 190px;
+    /* 493px width at 1024 = 48.14vw */
+    width: calc(493 / 1024 * 100vw);
+    /* 244px height at 1024 = 23.83vw */
+    height: calc(244 / 1024 * 100vw);
+    /* 12px border-radius */
+    border-radius: calc(12 / 1024 * 100vw);
+    /* Reset top positioning for vertical slider */
+    top: 0;
+    transform: none;
   }
 
   .slider-track-relative {
-    height: 220px;
+    /* Full height of parent for vertical scroll */
+    height: 100%;
+  }
+
+  .hero-slider-side {
+    /* Remove horizontal padding, add overflow hidden for vertical */
+    padding: 0;
+    overflow: hidden;
+    /* Ensure full height for vertical slider */
+    height: 100%;
   }
 }
 
 /* ================================================== */
-/* PROPORTIONAL SCALING: 1024px - 1439px              */
+/* PROPORTIONAL SCALING: 1025px - 1439px              */
 /* Everything scales relative to 1440px base          */
 /* Formula: value / 1440 * 100vw                      */
 /* ================================================== */
@@ -262,8 +297,7 @@
 
   .hero-text-side {
     /* 32px 157px 32px 32px at 1440 */
-    padding: calc(32 / 1440 * 100vw) calc(157 / 1440 * 100vw)
-      calc(32 / 1440 * 100vw) calc(32 / 1440 * 100vw);
+    padding: calc(32 / 1440 * 100vw) calc(157 / 1440 * 100vw) calc(32 / 1440 * 100vw) calc(32 / 1440 * 100vw);
     border-right: 1px solid #e5e5e5;
     display: flex;
     flex-direction: column;
