@@ -731,10 +731,11 @@ export default function Hero() {
 
             {/* HEADLINE */}
             <h1 className="hero-title">
-                Health insurance that <span ref={textRef1} className="anim-text">doesn&apos;t</span> <br />
+                Health insurance that <span ref={textRef1} className="anim-text">doesn&apos;t</span>{" "}
+                <br className="hero-line-break" />
 
                 <span className="whitespace-nowrap">
-                    <span ref={textRef2} className="anim-text">get in</span>
+                    <span ref={textRef2} className="anim-text">get</span>
 
                     {/* COLLAPSIBLE MARQUEE */}
                     <div ref={marqueeWrapperRef} className="marquee-wrapper">
@@ -749,7 +750,12 @@ export default function Hero() {
                         </div>
                     </div>
 
-                    <span ref={textRef3} className="anim-text">the way.</span>
+                    <span
+                        ref={textRef3}
+                        className="anim-text hero-text-tail"
+                    >
+                        in the way.
+                    </span>
                 </span>
             </h1>
 
