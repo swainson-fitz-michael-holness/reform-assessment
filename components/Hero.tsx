@@ -225,13 +225,13 @@ export default function Hero() {
                 relativePos -= totalCards;
             }
             const xPos = initialOffset + relativePos * step;
-            
+
             // Clear any previous GSAP transforms first
             gsap.set(card, { clearProps: "x,y,xPercent,yPercent,top,left,scale,transform" });
-            
+
             // Set position with explicit vertical centering
             // Using transform for both x position and vertical centering
-            gsap.set(card, { 
+            gsap.set(card, {
                 x: xPos,
                 top: '50%',
                 yPercent: -50,  // Centers vertically: translateY(-50%)
@@ -271,16 +271,16 @@ export default function Hero() {
         const wrapCards = () => {
             const params = animationStateRef.current.animParams;
             if (!params) return;
-            
+
             const currentContainerWidth = sliderContainer.offsetWidth;
 
             cards.forEach((card) => {
                 const currentX = gsap.getProperty(card, "x") as number;
-                
+
                 // Wrap right: if card's left edge is past right edge of container + buffer
                 if (currentX > currentContainerWidth + params.gap) {
                     gsap.set(card, { x: currentX - params.totalSpan });
-                } 
+                }
                 // Wrap left: if card's right edge is past left edge of container
                 else if (currentX < -(params.cardSize + params.gap)) {
                     gsap.set(card, { x: currentX + params.totalSpan });
@@ -291,12 +291,14 @@ export default function Hero() {
         // Animation loop - moves RIGHT
         const animateNextStep = () => {
             if (!animationStateRef.current.isAnimating) return;
-            if (animationStateRef.current.currentMode !== 'desktop') return;
+
+            const mode = animationStateRef.current.currentMode;
+            if (mode !== 'desktop' && mode !== 'mobile') return;
 
             // Get fresh dimensions for the animation step
             const currentDims = getDimensions();
             const currentStep = currentDims.cardWidth + currentDims.cardGap;
-            
+
             // Update stored params before animation
             animationStateRef.current.animParams = {
                 step: currentStep,
@@ -327,7 +329,7 @@ export default function Hero() {
         // Resize handler for horizontal - smooth repositioning without hiding
         const handleResize = () => {
             const newMode = getLayoutMode(window.innerWidth);
-            if (newMode !== 'desktop') return;
+            if (newMode !== 'desktop' && newMode !== 'mobile') return;
 
             const newDims = getDimensions();
             const newCardWidth = newDims.cardWidth;
@@ -428,11 +430,11 @@ export default function Hero() {
                 relativePos -= totalCards;
             }
             const yPos = initialOffset + relativePos * step;
-            
+
             // Clear previous transforms and set fresh positions for vertical mode
             gsap.set(card, { clearProps: "x,y,xPercent,yPercent,top,left,scale,transform" });
-            gsap.set(card, { 
-                x: centerX, 
+            gsap.set(card, {
+                x: centerX,
                 y: yPos,
                 top: 0,      // Override CSS top: 50%
                 yPercent: 0, // No percentage offset for vertical
@@ -472,12 +474,12 @@ export default function Hero() {
         const wrapCards = () => {
             const params = animationStateRef.current.animParams;
             if (!params) return;
-            
+
             const currentContainerHeight = sliderContainer.offsetHeight;
 
             cards.forEach((card) => {
                 const currentY = gsap.getProperty(card, "y") as number;
-                
+
                 // Wrap top: if card's bottom edge is above top edge of container
                 if (currentY < -(params.cardSize + params.gap)) {
                     gsap.set(card, { y: currentY + params.totalSpan });
@@ -497,7 +499,7 @@ export default function Hero() {
             // Get fresh dimensions for the animation step
             const currentDims = getDimensions();
             const currentStep = currentDims.cardHeight + currentDims.cardGap;
-            
+
             // Update stored params before animation
             animationStateRef.current.animParams = {
                 step: currentStep,
@@ -654,21 +656,30 @@ export default function Hero() {
         if (sliderContainer && cards.length > 0) {
             animationStateRef.current.isAnimating = true;
 
-            if (currentMode === 'desktop') {
-                animationStateRef.current.cleanup = initHorizontalSlider(sliderContainer, cards, dims);
+            if (currentMode === 'desktop' || currentMode === 'mobile') {
+                // Use desktop-style horizontal slider for both desktop + mobile
+                animationStateRef.current.cleanup = initHorizontalSlider(
+                    sliderContainer,
+                    cards,
+                    dims
+                );
             } else if (currentMode === 'tablet') {
-                animationStateRef.current.cleanup = initVerticalSlider(sliderContainer, cards, dims);
+                animationStateRef.current.cleanup = initVerticalSlider(
+                    sliderContainer,
+                    cards,
+                    dims
+                );
             }
 
             // Mode switch handler - smooth transition with minimal flicker
             let resizeTimeout: NodeJS.Timeout | null = null;
-            
+
             const handleModeSwitch = () => {
                 const newMode = getLayoutMode(window.innerWidth);
                 if (newMode !== animationStateRef.current.currentMode) {
                     // Debounce to prevent rapid switches during resize
                     if (resizeTimeout) clearTimeout(resizeTimeout);
-                    
+
                     resizeTimeout = setTimeout(() => {
                         // Cleanup current slider
                         if (animationStateRef.current.cleanup) {
@@ -686,10 +697,12 @@ export default function Hero() {
                                 animationStateRef.current.currentMode = newMode;
                                 const newDims = getDimensions();
 
-                                if (newMode === 'desktop') {
-                                    animationStateRef.current.cleanup = initHorizontalSlider(sliderContainer, cards, newDims);
+                                if (newMode === 'desktop' || newMode === 'mobile') {
+                                    animationStateRef.current.cleanup =
+                                        initHorizontalSlider(sliderContainer, cards, newDims);
                                 } else if (newMode === 'tablet') {
-                                    animationStateRef.current.cleanup = initVerticalSlider(sliderContainer, cards, newDims);
+                                    animationStateRef.current.cleanup =
+                                        initVerticalSlider(sliderContainer, cards, newDims);
                                 }
                             }
                         });
