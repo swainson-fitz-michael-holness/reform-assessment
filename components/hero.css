@@ -248,8 +248,7 @@
   /* Marquee on its own centered line */
   .hero-title .marquee-wrapper {
     display: block;
-    /* margin: 0.35em auto 0.35em; */
-    margin: 0 0;
+    margin: 0.35em auto 0.35em;
     transform: translateY(0); /* remove the desktop downshift */
   }
 
