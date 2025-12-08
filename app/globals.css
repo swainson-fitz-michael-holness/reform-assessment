@@ -3,59 +3,68 @@
 @tailwind utilities;
 
 :root {
-  --background: #FBFAF6; /* Off White */
-  --foreground: #081E13; /* Black 200 */
+  --background: #fbfaf6; /* Off White */
+  --foreground: #081e13; /* Black 200 */
+  --font-sohne: "Sohne", sans-serif;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
-  /* Smooth font rendering */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden; /* Prevent horizontal scroll from marquees */
 }
 
-/* FLUID TYPOGRAPHY IMPLEMENTATION 
-  Mimics the "VW based scaling".
-  1rem will scale relative to the viewport width.
+/* FLUID TYPOGRAPHY ENGINE 
+   Based on "Implementation Details" Image
 */
 
+/* 1. Base / Mobile (< 500px) 
+   We scale relatively. 1rem = approx 4.26vw (16px at 375px)
+*/
 html {
-  font-size: 16px; /* Fallback */
+  font-size: 4.26vw;
 }
 
-/* Mobile Scaling (Below 1024px) 
-   Assuming base design width is roughly 375px-500px for mobile/tablet hybrid
+/* 2. Tablet Scale (501px - 1024px) 
+   We reset the scale for tablet widths.
+   1rem = ~1.56vw (16px at 1024px)
 */
-@media (max-width: 1023px) {
+@media (min-width: 501px) and (max-width: 1024px) {
   html {
-    /* scales 16px at 375px width */
-    font-size: clamp(14px, 4.26vw, 20px); 
+    font-size: 1.56vw;
   }
 }
 
-/* Desktop Scaling (1024px - 1440px) 
-   Scales up to match the design at 1440px
+/* 3. Desktop Scale (1025px - 1440px)
+   1rem = 1.11vw (16px at 1440px)
 */
-@media (min-width: 1024px) {
+@media (min-width: 1025px) {
   html {
-     /* 16px at 1440px width => 1.11vw */
-    font-size: 1.111vw; 
+    font-size: 1.111vw;
   }
 }
 
-/* Max Width Cap (>1440px)
-   Stop scaling and center content with gutters.
+/* 4. Max Width Cap (> 1440px) 
+   Lock font size to 16px and center content
 */
 @media (min-width: 1441px) {
   html {
-    font-size: 16px; /* Lock size */
+    font-size: 16px;
   }
   body {
     max-width: 1440px;
     margin: 0 auto;
-    border-left: 1px solid #eee; /* Optional visual guide for "gutters" */
-    border-right: 1px solid #eee;
+    border-left: 1px solid #e5e5e5; /* Visual gutter guide */
+    border-right: 1px solid #e5e5e5;
   }
+}
+
+/* UTILITY: Hide scrollbar for the Marquee */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
