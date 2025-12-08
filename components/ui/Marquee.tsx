@@ -12,15 +12,19 @@ const ITEMS = [
 ];
 
 export default function Marquee() {
-  const container = useRef(null);
-  const slider = useRef(null);
+  // 1. Explicitly type the refs as HTMLDivElement
+  const container = useRef<HTMLDivElement>(null);
+  const slider = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    const totalWidth = slider.current.scrollWidth / 2; // Half because we doubled data
+    // 2. Add a safety guard. If the ref isn't attached, stop.
+    if (!slider.current) return;
+
+    const totalWidth = slider.current.scrollWidth / 2; 
     
     gsap.to(slider.current, {
       x: -totalWidth,
-      duration: 20, // Adjust speed here
+      duration: 20, 
       ease: "none",
       repeat: -1,
     });
@@ -32,13 +36,13 @@ export default function Marquee() {
         className="inline-flex h-[1em] w-[45vw] md:w-[35vw] align-middle overflow-hidden rounded-full border border-gray-200 bg-white mx-2 relative top-[-0.1em]"
     >
       <div ref={slider} className="flex items-center whitespace-nowrap h-full">
-        {/* Render items twice for seamless loop */}
         {[...ITEMS, ...ITEMS].map((item, i) => (
           <div
             key={i}
             className="flex items-center gap-2 px-4 text-[0.35em] font-bold tracking-widest text-orange-400 uppercase"
           >
-            <span>{item.icon}</span>
+            {/* 3. Render icons slightly smaller to fit the em-based layout if needed */}
+            <span className="scale-75">{item.icon}</span>
             <span>{item.text}</span>
             <span className="ml-4 text-gray-300">|</span>
           </div>
