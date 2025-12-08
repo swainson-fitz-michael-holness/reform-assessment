@@ -1,0 +1,146 @@
+/* components/hero.css */
+
+/* --- Variables based on Design Tokens --- */
+:root {
+  --c-black-200: #081e13;
+  --c-green-200: #00b684; /* The Active Green */
+  --c-off-white: #fbfaf6;
+  --c-orange: #d68f55;
+  --c-green-500: #153e2a;
+  --f-sohne: var(--font-sohne), "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+/* --- Layout Containers --- */
+.hero-section {
+  position: relative;
+  width: 100%;
+  background-color: var(--c-off-white);
+  padding-top: 10vh;
+  padding-bottom: 5rem;
+  overflow: hidden;
+}
+
+.hero-container {
+  width: 100%;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 1440px) {
+  .hero-container {
+    max-width: 1440px;
+    /* padding-left: 4rem;
+    padding-right: 4rem; */
+  }
+}
+
+/* --- Typography --- */
+.hero-title {
+  font-family: var(--f-sohne);
+  color: var(--c-green-500);
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  font-weight: 400; /* Buch */
+  text-align: center;
+
+  /* Fluid Scaling per specs */
+  font-size: 13vw;
+}
+
+@media (min-width: 768px) {
+  .hero-title {
+    font-size: 8vw;
+  }
+}
+
+@media (min-width: 1440px) {
+  .hero-title {
+    font-size: 112px;
+    line-height: 120%;
+    letter-spacing: -0.03em;
+  }
+}
+
+/* The target words that will turn green */
+.anim-text {
+  display: inline-block;
+  transform-origin: left center;
+  transition: color 0.5s ease;
+  /* Font-style will be handled by GSAP, but ensure backface visibility for smoothness */
+  backface-visibility: hidden;
+}
+
+/* --- Marquee Specifics --- */
+.marquee-wrapper {
+  display: inline-flex;
+  vertical-align: middle;
+  overflow: hidden;
+  position: relative;
+
+  /* Pill Shape */
+  border: 1px solid rgba(8, 30, 19, 0.2);
+  border-radius: 999px;
+
+  /* Sizing relative to font */
+  height: 0.75em;
+  margin: 0 0.2em;
+  transform: translateY(-0.05em); /* Optical alignment */
+}
+
+/* Inner slider track */
+.marquee-track {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.marquee-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0 1em;
+
+  font-size: 0.25em; /* Relative to parent H1 */
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--c-orange);
+}
+
+/* --- Bottom Card Slider --- */
+.card-slider-section {
+  margin-top: 8rem;
+  width: 100%;
+  border-top: 1px solid #e5e5e5;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 2rem 0;
+  background-color: var(--c-off-white);
+}
+
+.card-track {
+  display: flex;
+  gap: 2rem;
+  padding-left: 1rem;
+  width: max-content; /* Force horizontal */
+}
+
+.card-item {
+  position: relative;
+  flex-shrink: 0;
+  width: 300px;
+  height: 180px;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+}
+
+@media (min-width: 768px) {
+  .card-item {
+    width: 450px;
+    height: 260px;
+  }
+}
