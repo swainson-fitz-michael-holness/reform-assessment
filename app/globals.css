@@ -5,7 +5,6 @@
 :root {
   --background: #fbfaf6; /* Off White */
   --foreground: #081e13; /* Black 200 */
-  --font-sohne: "Sohne", sans-serif;
 }
 
 body {
@@ -15,52 +14,36 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* FLUID TYPOGRAPHY ENGINE 
-   Based on "Implementation Details" Image
-*/
-
-/* 1. Base / Mobile (< 500px) 
-   We scale relatively. 1rem = approx 4.26vw (16px at 375px)
-*/
+/* FLUID TYPOGRAPHY ENGINE */
 html {
-  font-size: 4.26vw;
+  font-size: 4.26vw; /* Mobile Baseline */
 }
 
-/* 2. Tablet Scale (501px - 1024px) 
-   We reset the scale for tablet widths.
-   1rem = ~1.56vw (16px at 1024px)
-*/
 @media (min-width: 501px) and (max-width: 1024px) {
   html {
-    font-size: 1.56vw;
+    font-size: 1.56vw; /* Tablet Reset */
   }
 }
 
-/* 3. Desktop Scale (1025px - 1440px)
-   1rem = 1.11vw (16px at 1440px)
-*/
 @media (min-width: 1025px) {
   html {
-    font-size: 1.111vw;
+    font-size: 1.111vw; /* Desktop Scale */
   }
 }
 
-/* 4. Max Width Cap (> 1440px) 
-   Lock font size to 16px and center content
-*/
 @media (min-width: 1441px) {
   html {
-    font-size: 16px;
+    font-size: 16px; /* Cap at 1440px width */
   }
   body {
     max-width: 1440px;
     margin: 0 auto;
-    border-left: 1px solid #e5e5e5; /* Visual gutter guide */
+    border-left: 1px solid #e5e5e5;
     border-right: 1px solid #e5e5e5;
   }
 }
 
-/* UTILITY: Hide scrollbar for the Marquee */
+/* UTILITIES */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
