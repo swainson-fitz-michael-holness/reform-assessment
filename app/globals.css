@@ -1,26 +1,61 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #FBFAF6; /* Off White */
+  --foreground: #081E13; /* Black 200 */
 }
 
 body {
-  background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--background);
+  /* Smooth font rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden; /* Prevent horizontal scroll from marquees */
+}
+
+/* FLUID TYPOGRAPHY IMPLEMENTATION 
+  Mimics the "VW based scaling".
+  1rem will scale relative to the viewport width.
+*/
+
+html {
+  font-size: 16px; /* Fallback */
+}
+
+/* Mobile Scaling (Below 1024px) 
+   Assuming base design width is roughly 375px-500px for mobile/tablet hybrid
+*/
+@media (max-width: 1023px) {
+  html {
+    /* scales 16px at 375px width */
+    font-size: clamp(14px, 4.26vw, 20px); 
+  }
+}
+
+/* Desktop Scaling (1024px - 1440px) 
+   Scales up to match the design at 1440px
+*/
+@media (min-width: 1024px) {
+  html {
+     /* 16px at 1440px width => 1.11vw */
+    font-size: 1.111vw; 
+  }
+}
+
+/* Max Width Cap (>1440px)
+   Stop scaling and center content with gutters.
+*/
+@media (min-width: 1441px) {
+  html {
+    font-size: 16px; /* Lock size */
+  }
+  body {
+    max-width: 1440px;
+    margin: 0 auto;
+    border-left: 1px solid #eee; /* Optional visual guide for "gutters" */
+    border-right: 1px solid #eee;
+  }
 }
