@@ -6,12 +6,12 @@ import "./globals.css";
 const sohne = localFont({
   src: [
     {
-      path: '../public/fonts/WOFF2/soehne-buch.woff2', 
+      path: '../public//fonts/WOFF2/soehne-buch.woff2', 
       weight: '400',
       style: 'normal',
     },
     {
-      path: '../publicpublic/fonts/WOFF2/soehne-kraftig.woff2', 
+      path: '../public/fonts/WOFF2/soehne-kraftig.woff2', 
       weight: '700',
       style: 'normal',
     },
