@@ -596,6 +596,7 @@ export default function Hero() {
     useGSAP(() => {
         const dims = getDimensions();
         const currentMode = dims.mode;
+        const isMobile = currentMode === "mobile";
         animationStateRef.current.currentMode = currentMode;
 
         // 1. Marquee Infinite Scroll
@@ -612,29 +613,76 @@ export default function Hero() {
         // 2. MAIN ANIMATION SEQUENCE (Marquee collapse)
         const tl = gsap.timeline({ delay: 3 });
 
-        // Use responsive marquee width
-        tl.to(marqueeWrapperRef.current, {
-            width: dims.marqueeExpandedWidth,
-            duration: 0.7,
-            ease: "sine.in",
-        });
+        if (!isMobile) {
+            // Use responsive marquee width
+            tl.to(marqueeWrapperRef.current, {
+                width: dims.marqueeExpandedWidth,
+                duration: 0.7,
+                ease: "sine.in",
+            });
+        }
 
         tl.add("collapseStart");
 
-        tl.to(marqueeWrapperRef.current, {
-            width: 0,
-            marginLeft: 0,
-            marginRight: 18,
-            padding: 0,
-            duration: 1.0,
-            ease: CustomEase.create("custom", "M0,0 C0.482,0 0.798,0.419 0.844,0.588 0.911,0.836 0.915,0.935 1,1 "),
-        }, "collapseStart");
+        const collapseEase = CustomEase.create(
+            "custom",
+            "M0,0 C0.482,0 0.798,0.419 0.844,0.588 0.911,0.836 0.915,0.935 1,1 "
+        );
 
-        tl.to(marqueeWrapperRef.current, {
-            height: 0,
-            duration: 0.5,
-            ease: CustomEase.create("custom", "M0,0 C0.482,0 0.798,0.419 0.844,0.588 0.911,0.836 0.915,0.935 1,1 "),
-        }, "collapseStart+=0.5");
+        // MOBILE: pinch from center using scaleX
+        if (isMobile) {
+            tl.to(
+                marqueeWrapperRef.current,
+                {
+                    width: 0,
+                    height: 0,
+                    duration: 1.0,
+                    ease: collapseEase,
+                },
+                "collapseStart"
+            );
+        } else {
+            // TABLET + DESKTOP: keep existing right-to-left width collapse
+
+            tl.to(
+                marqueeWrapperRef.current,
+                {
+                    width: 0,
+                    marginLeft: 0,
+                    marginRight: 18,
+                    padding: 0,
+                    duration: 1.0,
+                    ease: collapseEase,
+                },
+                "collapseStart"
+            );
+
+            // Vertical collapse (same for all modes)
+            tl.to(
+                marqueeWrapperRef.current,
+                {
+                    height: 0,
+                    duration: 0.5,
+                    ease: collapseEase,
+                },
+                "collapseStart+=0.5"
+            );
+
+            tl.to(marqueeWrapperRef.current, {
+                width: 0,
+                marginLeft: 0,
+                marginRight: 18,
+                padding: 0,
+                duration: 1.0,
+                ease: CustomEase.create("custom", "M0,0 C0.482,0 0.798,0.419 0.844,0.588 0.911,0.836 0.915,0.935 1,1 "),
+            }, "collapseStart");
+
+            tl.to(marqueeWrapperRef.current, {
+                height: 0,
+                duration: 0.5,
+                ease: CustomEase.create("custom", "M0,0 C0.482,0 0.798,0.419 0.844,0.588 0.911,0.836 0.915,0.935 1,1 "),
+            }, "collapseStart+=0.5");
+        }
 
         tl.to([textRef1.current, textRef2.current, textRef3.current], {
             transform: "skew(1deg)",
