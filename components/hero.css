@@ -4,8 +4,9 @@
 :root {
   --c-black-200: #081e13;
   --c-green-200: #00b684; /* The Active Green */
+  --c-green-100: #ccddc7;
   --c-off-white: #fbfaf6;
-  --c-orange: #d68f55;
+  --c-orange: #d87906;
   --c-green-500: #153e2a;
   --f-sohne: var(--font-sohne), "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
@@ -58,7 +59,7 @@
 @media (min-width: 1440px) {
   .hero-title {
     font-size: 112px;
-    line-height: 120%;
+    line-height: 96px;
     letter-spacing: -0.03em;
   }
 }
@@ -67,7 +68,7 @@
 .anim-text {
   display: inline-block;
   transform-origin: left center;
-  transition: color 0.5s ease;
+  transition: color 0.3s ease;
   /* Font-style will be handled by GSAP, but ensure backface visibility for smoothness */
   backface-visibility: hidden;
 }
@@ -80,13 +81,25 @@
   position: relative;
 
   /* Pill Shape */
-  border: 1px solid rgba(8, 30, 19, 0.2);
-  border-radius: 999px;
+  border: 1px solid var(--c-green-100);
+  border-radius: 12px;
 
   /* Sizing relative to font */
-  height: 0.75em;
+  /* height: 0.75em; */
   margin: 0 0.2em;
-  transform: translateY(-0.05em); /* Optical alignment */
+  transform: translateY(0.9em); /* Optical alignment */
+
+  width: 662px;
+  height: 79px;
+
+  font-size: 12px;
+  line-height: 120%;
+
+  text-align: center;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+
+  color: #d87906;
 }
 
 /* Inner slider track */
@@ -103,7 +116,7 @@
   gap: 0.5em;
   padding: 0 1em;
 
-  font-size: 0.25em; /* Relative to parent H1 */
+  /* font-size: 0.25em;  */
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;

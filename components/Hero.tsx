@@ -2,10 +2,11 @@
 import React, { useRef } from "react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
+import { CustomEase } from "gsap/CustomEase";
 import ArrowButton from "./ui/ArrowButton";
 import { AlertCircle, FileQuestion, Ban, Timer } from "lucide-react";
 import Image from "next/image";
-import "./hero.css"; // Import the CSS file
+import "./hero.css";
 
 const MARQUEE_ITEMS = [
     { text: "UNPREDICTABLE RATE INCREASES", icon: <AlertCircle size="1em" /> },
@@ -29,24 +30,24 @@ export default function Hero() {
     const marqueeTrackRef = useRef<HTMLDivElement>(null);
     const cardTrackRef = useRef<HTMLDivElement>(null);
 
-    // Refs for the text parts we need to colorize
+    // Refs for the text parts
     const textRef1 = useRef<HTMLSpanElement>(null); // "doesn't"
     const textRef2 = useRef<HTMLSpanElement>(null); // "get in"
     const textRef3 = useRef<HTMLSpanElement>(null); // "the way"
 
     useGSAP(() => {
-        // 1. Infinite Scrolling Marquee (Inner Track)
+        // 1. Marquee Infinite Scroll
         if (marqueeTrackRef.current) {
             const w = marqueeTrackRef.current.scrollWidth / 2;
             gsap.to(marqueeTrackRef.current, {
                 x: -w,
-                duration: 20,
+                duration: 5,
                 ease: "none",
                 repeat: -1,
             });
         }
 
-        // 2. Bottom Card Slider (Infinite Loop)
+        // 2. Card Slider Infinite Scroll
         if (cardTrackRef.current) {
             const w = cardTrackRef.current.scrollWidth / 2;
             gsap.to(cardTrackRef.current, {
@@ -57,26 +58,54 @@ export default function Hero() {
             });
         }
 
-        // 3. MAIN SEQUENCE: Collapse & Color Change
-        const tl = gsap.timeline({ delay: 3 }); // Wait 3 seconds
+        // 3. MAIN ANIMATION SEQUENCE
+        const tl = gsap.timeline({ delay: 3 });
 
-        // Step A: Shrink the Marquee wrapper to 0 width
+        // Step A: ANTICIPATION (Breathing In)
+        // The marquee swells slightly in width before collapsing
+        tl.to(marqueeWrapperRef.current, {
+            width: "670px", // Expand slightly from 662px
+            duration: 1.0,
+            ease: "sine.in",
+        });
+
+        // Start a label to sync the collapse and text movement
+        tl.add("collapseStart");
+
+        // Step B: COLLAPSE (Width first, Height delayed)
+        // 1. Width collapses
         tl.to(marqueeWrapperRef.current, {
             width: 0,
             marginLeft: 0,
             marginRight: 0,
-            opacity: 0,
             padding: 0,
-            duration: 1.2,
-            ease: "power3.inOut"
-        })
-            // Step B: Turn text Green and Italic simultaneously
-            .to([textRef1.current, textRef2.current, textRef3.current], {
-                color: "var(--c-green-200)", // Using the CSS variable
-                fontStyle: "italic",
-                duration: 0.6,
-                ease: "power2.out"
-            }, "-=0.4"); // Start slightly before the collapse finishes
+            duration: 1.0,
+            ease: CustomEase.create("custom", "M0,0 C0.482,0 0.798,0.419 0.844,0.588 0.911,0.836 0.915,0.935 1,1 "),
+        }, "collapseStart");
+
+        // 2. Height collapses (Delayed start, fast finish)
+        tl.to(marqueeWrapperRef.current, {
+            height: 0,
+            duration: 0.5,
+            ease: CustomEase.create("custom", "M0,0 C0.482,0 0.798,0.419 0.844,0.588 0.911,0.836 0.915,0.935 1,1 "),
+        }, "collapseStart+=0.5"); // Starts 0.6s into the width collapse
+
+        // Step C: TEXT ANTICIPATION (Skew Opposite)
+        // While marquee collapses, text leans slightly BACK (right)
+        tl.to([textRef1.current, textRef2.current, textRef3.current], {
+            transform: "skew(1deg)", // Opposite direction
+            duration: 0.5,
+            ease: "power1.inOut"
+        }, "collapseStart+=0.5");
+
+        // Step D: TEXT IMPACT (Skew Target + Green)
+        // Text snaps forward to final state
+        tl.to([textRef1.current, textRef2.current, textRef3.current], {
+            color: "var(--c-green-200)",
+            transform: "skew(-12deg)", // Final "Italic" feel
+            duration: 0.3,
+            ease: "back.out(1.7)" // The "Impact" bounce
+        }, ">-0.0"); // Start just before the previous skew fully finishes
 
     }, { scope: containerRef });
 
